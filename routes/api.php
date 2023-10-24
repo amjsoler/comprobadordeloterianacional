@@ -1,114 +1,38 @@
 <?php
 
-use Illuminate\Http\Request;
+use App\Http\Controllers\ApiAuthentication;
 use Illuminate\Support\Facades\Route;
 
-/*
-|--------------------------------------------------------------------------
-| API Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register API routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "api" middleware group. Make something great!
-|
-*/
+//////////////////////////////////////
+/////// RUTAS DE AUTENTICACIÓN ///////
+//////////////////////////////////////
 
-Route::post("/login", function (){
-    return response()->json(
-        array(
-            "access_token" => "3|04efeIXoqg1h4Tnkq8Nvm4jmqQJbTng7y9erYPcXce6a1069",
-            "token_type" => "Bearer"
-        ),
-        200
-    );
-});
+Route::post("/login",
+    [ApiAuthentication::class, "login"]);
 
-Route::post("/register", function() {
-    return response()->json(
-        array(
-            "name" => "Jorge",
-            "email" => "asdf2@asdf.com",
-            "updated_at" => "2023-10-24T08:28:51.000000Z",
-            "created_at" => "2023-10-24T08:28:51.000000Z",
-            "id" => 104,
-            "access_token" => "6|KSgrM5dvYsPZkHKqvDpoYMYDjGA3SY1Hs3k7AP8udf1ae51a",
-            "token_type"=> "Bearer",
-            "profile_photo_url"=> "https://ui-avatars.com/api/?name=J&color=7F9CF5&background=EBF4FF",
-            "misdecimos" => array(
-                array(
-                    "id" => 100,
-                    "sorteo" => 15,
-                    "numero" => "56788",
-                    "serie" => 3,
-                    "fraccion" => 4,
-                    "reintegro" => 3,
-                    "cantidad" => 25
-                ),
-                array(
-                    "id" => 567,
-                    "sorteo" => 13,
-                    "numero" => "09876",
-                    "serie" => 3,
-                    "fraccion" => 1,
-                    "reintegro" => 3,
-                    "cantidad" => 25
-                ),
-            )
-        ),200
-    );
-});
+Route::post("/register",
+    [ApiAuthentication::class, "register"]);
 
-Route::get("mis-decimos", function(){
-    return response()->json(
-        array(
-            array(
-                "id" => 100,
-                "sorteo" => 15,
-                "numero" => "56788",
-                "serie" => 12,
-                "fraccion" => 4,
-                "reintegro" => 3,
-                "cantidad" => 25
-            ),
-            array(
-                "id" => 567,
-                "sorteo" => 13,
-                "numero" => "09876",
-                "serie" => 2,
-                "fraccion" => 1,
-                "reintegro" => 3,
-                "cantidad" => 25
-                ),
-        ),200
-    );
-});
+//TODO Verificación de correo electrónico
 
-Route::post("recuperar-contrasena", function (){
-   return response()->json(
-       "", 200
-   );
-});
+//TODO: Recuperar contraseña (este manda un mail con enlace que va a al form de la parte web)
 
-Route::post("mis-decimos/crear", function(){
-   return response()->json(
-       array(
-           "id" => 567,
-           "sorteo" => 13,
-           "numero" => "09876",
-           "serie" => 2,
-           "fraccion" => 1,
-           "reintegro" => 3,
-           "cantidad" => 25
-       ), 200
-   );
-});
 
-Route::delete("/mis-decimos/{decimo}", function(){
-   return response()->json(
-      "", 200
-   );
-});
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
+//////////////////////////////////////
+//////////////////////////////////////
+//////////////////////////////////////
+
+////////////////////////////////
+/////// RUTAS DE DÉCIMOS ///////
+////////////////////////////////
+
+//Todas estas llevan auth:sanctum y el policy(excepto crear)
+//TODO: Crear un nuevo décimo
+//TODO: Editar un décimo
+//TODO: Eliminar un décimo
+
+////////////////////////////////
+////////////////////////////////
+////////////////////////////////
+
+//TODO Comprobardecimo
