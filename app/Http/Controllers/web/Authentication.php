@@ -3,11 +3,12 @@
 namespace App\Http\Controllers\web;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\GuardarNuevaContrasena;
+use App\Http\Requests\RecuperarCuentaPostRequest;
 use App\Models\AccountVerifyToken;
+use App\Models\RecuperarCuentaToken;
 use App\Models\User;
 use Exception;
-use Illuminate\Support\Facades\Hash;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
 class Authentication extends Controller
@@ -88,22 +89,145 @@ class Authentication extends Controller
         return view("cuentaUsuario/verificarCuenta", compact("response"));
     }
 
-    public function guardarNuevaContrasena(GuardarNuevaContrasena $request)
+    /**
+     * Método que devuelve el formulario de cambio de contraseña en caso de que el token sea válido
+     *
+     * @param Request $request request que incluye el token
+     *
+     * @return
+     */
+    public function recuperarCuentaGet(string $token)
     {
-        //Comprobar token
-        $resultToken = AccountVerifyToken::consultarToken($request->get("token"));
+        $response = [
+            "status" => "",
+            "code" => "",
+            "statusText" => "",
+            "data" => []
+        ];
 
-        if($resultToken["data"]){
-            //TODO: Cambiar la siguiente linea
-            $user = User::find($resultToken["data"]->user)->first();
+        try{
+            //Log de entrada
+            Log::debug("Entrando al recuperarCuentaGet de Authentication",
+                array(
+                    "request: " => compact("token")
+                )
+            );
 
-            $user->password = Hash::make($request->get("password"));
+            //Consulto el token y veo si todavía es válido
+            $result = RecuperarCuentaToken::consultarToken($token);
 
-            $user->save();
+            $recuperarCuentaResult = $result["data"];
 
-            return "La contraseña se ha cambiado correctamente. Ya puedes cerrar esta ventana y volver a la app";
-        }else{
+            if($recuperarCuentaResult){
+                $response["code"] = 0;
+                $response["status"] = 200;
+                $response["statusText"] = "ok";
+                $response["data"] = $recuperarCuentaResult;
+            }else{
+                $response["code"] = -12;
+                $response["status"] = 400;
+                $response["statusText"] = "ko";
 
+                //El token no es válido, no se ha encontrado porque se lo ha inventado cambiando la url o se ha caducado
+            }
+
+            //Log de salida
+            Log::debug("Saliendo del verificarCuentaConToken de Authentication",
+                array(
+                    "request: " => $token,
+                    "response: " => $response
+                )
+            );
         }
+        catch(Exception $e){
+            $response["code"] = -11;
+            $response["status"] = 400;
+            $response["statusText"] = "ko";
+
+            Log::error($e->getMessage(),
+                array(
+                    "request: " => $token,
+                    "response: " => $response
+                )
+            );
+        }
+
+        return view("cuentaUsuario.recuperarCuenta", compact("response"));
+    }
+
+    /**
+     * Método para guardar la nueva contraseña de usuario
+     *
+     * @param RecuperarCuentaPostRequest $request request que contiene la contraseña y el token
+     *
+     * @return void
+     *   0: ok
+     * -11: Excepción
+     * -12: El token no es válido
+     * -13: Fallo al guardar la nueva contraseña
+     */
+    public function recuperarCuentaPost(RecuperarCuentaPostRequest $request)
+    {
+        $response = [
+            "status" => "",
+            "code" => "",
+            "statusText" => "",
+            "data" => []
+        ];
+
+        try{
+            //Log de entrada
+            Log::debug("Entrando al recuperarCuentaPost de Authentication",
+                array(
+                    "request: " => $request->all()
+                ));
+
+            //Consulto el token y veo si todavía es válido
+            $result = RecuperarCuentaToken::consultarToken($request->get("token"));
+
+            $recuperarCuentaResult = $result["data"];
+
+            if($recuperarCuentaResult){
+                $resultMarcarVerificacion = User::guardarNuevoPass($recuperarCuentaResult->usuario, $request->get("password"));
+
+                if($resultMarcarVerificacion["code"] == 0){
+                    $response["code"] = 0;
+                    $response["status"] = 200;
+                    $response["statusText"] = "ok";
+                }else{
+                    $response["code"] = -13;
+                    $response["status"] = 400;
+                    $response["statusText"] = "ko";
+                }
+            }else{
+                $response["code"] = -12;
+                $response["status"] = 400;
+                $response["statusText"] = "ko";
+
+                //El token no es válido, no se ha encontrado porque se lo ha inventado cambiando la url o se ha caducado
+            }
+
+            //Log de salida
+            Log::debug("Saliendo del recuperarCuentaPost de Authentication",
+                array(
+                    "request: " => $request->all(),
+                    "response: " => $response
+                )
+            );
+        }
+        catch(Exception $e){
+            $response["code"] = -11;
+            $response["status"] = 400;
+            $response["statusText"] = "ko";
+
+            Log::error($e->getMessage(),
+                array(
+                    "request: " => $request->all(),
+                    "repsonse: " => $response
+                )
+            );
+        }
+
+        return view("cuentaUsuario.recuperarCuentaResult", compact("response"));
     }
 }

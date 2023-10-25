@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('account_verify_tokens', function (Blueprint $table) {
+        Schema::create('recuperar_cuenta_tokens', function (Blueprint $table) {
             $table->id();
 
             $table->unsignedBigInteger("usuario")->unique();
@@ -28,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('account_verify_tokens');
+        Schema::dropIfExists('recuperar_cuenta_tokens');
     }
 };

@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Laravel\Sanctum\HasApiTokens;
 
@@ -70,6 +71,16 @@ class User extends Authenticatable
     public function accountVerifyToken() : HasOne
     {
         return $this->hasOne(AccountVerifyToken::class, "usuario", "id");
+    }
+
+    /**
+     * Un usuario tiene un token de recuperación de cuenta
+     *
+     * @return HasOne
+     */
+    public function recuperarCuentaToken() : HasOne
+    {
+        return $this->hasOne(RecuperarCuentaToken::class, "usuario", "id");
     }
 
     /////////////////////////////
@@ -255,6 +266,55 @@ class User extends Authenticatable
             Log::error($e->getMessage(),
                 array(
                     "request: " => compact("userID"),
+                    "response: " => $response
+                )
+            );
+        }
+
+        return $response;
+    }
+
+    public static function guardarNuevoPass($usuarioID, $password)
+    {
+        $response = [
+            "code" => "",
+            "data" => ""
+        ];
+
+        try{
+            //Log de entrada
+            Log::debug("Entrando al guardarNuevoPass de User",
+                array(
+                    "request: " => compact("usuarioID", "password")
+                )
+            );
+
+            //Acción
+            $result = User::find($usuarioID);
+
+            $result->password = Hash::make($password);
+
+            if($result->save()){
+                $response["code"] = 0;
+            }
+            else{
+                $response["code"] = -2;
+            }
+
+            //Log de salida
+            Log::debug("Saliendo del guardarNuevoPass de User",
+                array(
+                    "request: " => compact("usuarioID", "password"),
+                    "response: " => $response
+                )
+            );
+        }
+        catch(Exception $e){
+            $response["code"] = -1;
+
+            Log::error($e->getMessage(),
+                array(
+                    "request: " => compact("usuarioID", "password"),
                     "response: " => $response
                 )
             );

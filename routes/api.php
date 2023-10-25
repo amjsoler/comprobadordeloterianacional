@@ -13,7 +13,11 @@ Route::post("/iniciar-sesion",
 Route::post("/registrarse",
     [ApiAuthentication::class, "register"]);
 
-//TODO Verificación de correo electrónico
+Route::post("/recuperar-cuenta",
+    [
+        ApiAuthentication::class, "recuperarCuenta"
+    ]
+);
 
 //TODO: Recuperar contraseña (este manda un mail con enlace que va a al form de la parte web)
 

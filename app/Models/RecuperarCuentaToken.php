@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Notifications\RecuperarCuenta;
 use Exception;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -9,14 +10,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 
-class AccountVerifyToken extends Model
+class RecuperarCuentaToken extends Model
 {
     use HasFactory;
 
-    protected $primaryKey = "id";
-
-    protected $table = "account_verify_tokens";
-
+    protected $table = "recuperar_cuenta_tokens";
 
     ////////////////
     // RELACIONES //
@@ -32,16 +30,17 @@ class AccountVerifyToken extends Model
     ///////////////////////
 
     /**
-     * Método para crear un nuevo token de verificación
+     * Método para crear un nuevo token de recuperación de cuenta
      *
      * @param int $userID El usuario al que se asocia el token
+     * @param Datetime $validez Hasta cuando es válido el token
      *
      * @return AccountVerifyToken Nuevo token creado para la verificación de la cuenta
      *  0: OK
      * -1: Excepción
      * -2: No se ha podido guardar el nuevo token
      */
-    public static function crearTokenDeVerificacion(int $userID, $validez)
+    public static function crearTokenDeRecuperacionCuenta(int $userID, $validez)
     {
         $response = [
             "code" => "",
@@ -50,25 +49,25 @@ class AccountVerifyToken extends Model
 
         try{
             //Log de entrada
-            Log::debug("Entrando al crearTokenDeVerificación de AccountVerifyToken",
+            Log::debug("Entrando al crearTokenDeRecuperacionCuenta de RecuperarCuentaToken",
                 array(
                     "request: " => compact("userID", "validez")
                 )
             );
 
             //Acción
-            //Primero borro los tokens del usuario ya que solo puede tener uno
-            AccountVerifyToken::where("usuario", $userID)->delete();
+            //Primero vacío los tokens del usuario para crear uno nuevo puesto un usuario solo puede tener un token
+            RecuperarCuentaToken::where("usuario", $userID)->delete();
 
-            //Ahora creo el token
-            $nuevoAccountVerify = new AccountVerifyToken();
-            $nuevoAccountVerify->usuario = $userID;
-            $nuevoAccountVerify->token = str_replace("/", "", Hash::make(now()));
-            $nuevoAccountVerify->valido_hasta = $validez;
+            //Ahora creo el nuevo token
+            $nuevoRecuperarCuenta = new RecuperarCuentaToken();
+            $nuevoRecuperarCuenta->usuario = $userID;
+            $nuevoRecuperarCuenta->token = str_replace("/", "", Hash::make(now()));
+            $nuevoRecuperarCuenta->valido_hasta = $validez;
 
-            if($nuevoAccountVerify->save()){
+            if($nuevoRecuperarCuenta->save()){
                 $response["code"] = 0;
-                $response["data"] = $nuevoAccountVerify;
+                $response["data"] = $nuevoRecuperarCuenta;
             }
             else{
                 $response["code"] = -2;
@@ -82,7 +81,7 @@ class AccountVerifyToken extends Model
             }
 
             //Log de salida
-            Log::debug("Saliendo del crearTokenDeVerificación de AccountVerifyToken",
+            Log::debug("Saliendo del crearTokenDeRecuperacionCuenta de RecuperarCuentaToken",
                 array(
                     "request: " => compact("userID", "validez"),
                     "response: " => $response
@@ -121,14 +120,14 @@ class AccountVerifyToken extends Model
 
         try{
             //Log de entrada
-            Log::debug("Entrando al consultarToken de AccountVerifyToken",
+            Log::debug("Entrando al consultarToken de RecuperarCuentaToken",
                 array(
                     "request: " => compact("token")
                 )
             );
 
             //Acción
-            $result = AccountVerifyToken::where("token", "=", $token)
+            $result = RecuperarCuentaToken::where("token", "=", $token)
                 ->where("valido_hasta", ">", now())
                 ->first();
 
@@ -136,7 +135,7 @@ class AccountVerifyToken extends Model
             $response["data"] = $result;
 
             //Log de salida
-            Log::debug("Saliendo del consultarToken de AccountVerifyToken",
+            Log::debug("Saliendo del consultarToken de RecuperarCuentaToken",
                 array(
                     "request: " => compact("token"),
                     "response: " => $response

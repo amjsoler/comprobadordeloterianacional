@@ -2,17 +2,18 @@
 
 namespace App\Http\Controllers;
 
-use App\Events\UsuarioRegistrado;
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RegisterRequest;
 use App\Models\AccountVerifyToken;
+use App\Models\RecuperarCuentaToken;
 use App\Models\User;
+use App\Notifications\RecuperarCuenta;
 use App\Notifications\VerificarNuevaCuentaUsuario;
 use Exception;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
-use function Laravel\Prompts\error;
 
 class ApiAuthentication extends Controller
 {
@@ -214,6 +215,79 @@ class ApiAuthentication extends Controller
         );
     }
 
+    public function recuperarCuenta(Request $request)
+    {
+        $response = [
+            "status" => "",
+            "code" => "",
+            "statusText" => "",
+            "data" => []
+        ];
+
+        try{
+            //Log de entrada
+            Log::debug("Entrando al recuperarCuenta de ApiAuthentication",
+                array(
+                    "request: " => $request->all()
+                ));
+
+            $resultDameUsuario = User::dameUsuarioDadoCorreo($request->get("correo"));
+
+            if($resultDameUsuario["code"] == 0){
+                $usuario = $resultDameUsuario["data"];
+
+                //Creo el nuevo token
+                $validez = now()->addMinute(env("TIEMPO_VALIDEZ_TOKEN_RECUPERAR_CUENTA_EN_MINUTOS"));
+                $result = RecuperarCuentaToken::crearTokenDeRecuperacionCuenta($usuario->id, $validez);
+
+                if($result["code"] == 0){
+                    //Se ha creado el token correctamente, ahora lo mando por correo
+                    $tokenCreado = $result["data"];
+                    $usuario->notify(new RecuperarCuenta($tokenCreado->token));
+
+                    $response["code"] = 0;
+                    $response["status"] = 200;
+                    $response["statusText"] = "ok";
+                }else{
+                    $response["code"] = -12;
+                    $response["status"] = 400;
+                    $response["statusText"] = "ko";
+                }
+            }else{
+                //Si no se encuentra al usuario respondo con OK porque no quiero dar info de si existe el correo o no
+
+                $response["code"] = 0;
+                $response["status"] = 200;
+                $response["statusText"] = "ok";
+            }
+
+            //Log de salida
+            Log::debug("Saliendo del recuperarCuenta de ApiAuthentication",
+                array(
+                    "request: " => $request->all(),
+                    "response: " => $response
+                )
+            );
+        }
+        catch(Exception $e){
+            $response["code"] = -11;
+            $response["status"] = 400;
+            $response["statusText"] = "ko";
+
+            Log::error($e->getMessage(),
+                array(
+                    "request: " => $request->all(),
+                    "repsonse: " => $response
+                )
+            );
+        }
+
+        return response()->json(
+            $response["data"],
+            $response["status"]
+        );
+    }
+
     /**
      * Método para enviar un correo de verificación de cuenta
      *
@@ -237,7 +311,7 @@ class ApiAuthentication extends Controller
 
             //Creo el nuevo token
             $validez = now()->addMinute(env("TIEMPO_VALIDEZ_TOKEN_VERIFICACION_EN_MINUTOS"));
-            $result = AccountVerifyToken::crearTokenDeVerificación(auth()->user()->id, $validez);
+            $result = AccountVerifyToken::crearTokenDeVerificacion(auth()->user()->id, $validez);
 
             if($result["code"] == 0){
                 //Se ha creado el token correctamente, ahora lo mando por correo

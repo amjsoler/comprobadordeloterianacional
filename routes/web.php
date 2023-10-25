@@ -10,6 +10,14 @@ Route::get("verificar-cuenta/{token}",
     ]
 )->name("verificarcuentacontoken");
 
+Route::get("recuperar-cuenta/{token}",
+    [Authentication::class, "recuperarCuentaGet"]
+)->name("recuperarcuentaget");
+
+Route::post("recuperar-cuenta",
+    [Authentication::class, "recuperarCuentaPost"]
+)->name("recuperarcuentapost");
+
 //TODO Crear un sorteo
 //TODO Editar un sorteo
 //TODO Eliminar un sorteo
