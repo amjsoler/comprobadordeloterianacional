@@ -5,6 +5,7 @@ namespace App\Models;
 use Exception;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Log;
@@ -59,6 +60,16 @@ class User extends Authenticatable
     public function decimos() : HasMany
     {
         return $this->hasMany(Decimo::class, "usuario", "id");
+    }
+
+    /**
+     * Un usuario tiene un token de verificación de cuenta
+     *
+     * @return HasOne
+     */
+    public function accountVerifyToken() : HasOne
+    {
+        return $this->hasOne(AccountVerifyToken::class, "usuario", "id");
     }
 
     /////////////////////////////
@@ -184,6 +195,66 @@ class User extends Authenticatable
             Log::error($e->getMessage(),
                 array(
                     "request: " => compact("name", "email", "password"),
+                    "response: " => $response
+                )
+            );
+        }
+
+        return $response;
+    }
+
+    /**
+     * Método para marcar una cuenta de usuario como verificada
+     *
+     * @param int $userID El id del usuario a verificar
+     *
+     * @return null
+     *  0: OK
+     * -1: Excepción
+     * -2: Error al guardar el usuario
+     *
+     */
+    public static function marcarCuentaVerificada(int $userID)
+    {
+        $response = [
+            "code" => "",
+            "data" => ""
+        ];
+
+        try{
+            //Log de entrada
+            Log::debug("Entrando al marcarCuentaVerificada de User",
+                array(
+                    "request: " => compact("userID")
+                )
+            );
+
+            //Acción
+            $result = User::find($userID);
+
+            $result->email_verified_at = now();
+
+            if($result->save()){
+                $response["code"] = 0;
+            }
+            else{
+                $response["code"] = -2;
+            }
+
+            //Log de salida
+            Log::debug("Saliendo del marcarCuentaVerificada de User",
+                array(
+                    "request: " => compact("userID"),
+                    "response: " => $response
+                )
+            );
+        }
+        catch(Exception $e){
+            $response["code"] = -1;
+
+            Log::error($e->getMessage(),
+                array(
+                    "request: " => compact("userID"),
                     "response: " => $response
                 )
             );

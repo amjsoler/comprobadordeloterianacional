@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\UsuarioRegistrado;
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RegisterRequest;
+use App\Models\AccountVerifyToken;
 use App\Models\User;
+use App\Notifications\VerificarNuevaCuentaUsuario;
 use Exception;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -109,6 +112,7 @@ class ApiAuthentication extends Controller
      * -11: Excepción
      * -12: Error al crear el nuevo usuario en el modelo
      * -13: Error al intentar iniciar sesión
+     * -14: No se ha podido mandar el mail de validación
      */
     public function register(RegisterRequest $request)
     {
@@ -145,13 +149,19 @@ class ApiAuthentication extends Controller
                     $user["access_token"] = $token;
                     $user["token_type"] = "Bearer";
 
-                    //TODO: Enviar una notificación/correo con el link de verificación
+                    //Mandando notificación con el enlace
+                    $resultMandarCorreo = $this->mandarCorreoVerificacionCuenta();
 
-                    $response["data"] = $user;
-                    $response["code"] = 0;
-                    $response["status"] = 200;
-                    $response["statusText"] = "ok";
-
+                    if($resultMandarCorreo["code"] == 0){
+                        $response["data"] = $user;
+                        $response["code"] = 0;
+                        $response["status"] = 200;
+                        $response["statusText"] = "ok";
+                    }else{
+                        $response["code"] = -14;
+                        $response["status"] = 400;
+                        $response["statusText"] = "ko";
+                    }
                 } else{
                     $response["code"] = -13;
                     $response["status"] = 400;
@@ -178,7 +188,7 @@ class ApiAuthentication extends Controller
             }
 
             //Log de salida
-            Log::debug("Saliendo del register del EstablecimientoController",
+            Log::debug("Saliendo del register del ApiAuthentication",
                 array(
                     "request: " => $request->all(),
                     "response: " => $response
@@ -202,5 +212,72 @@ class ApiAuthentication extends Controller
             $response["data"],
             $response["status"]
         );
+    }
+
+    /**
+     * Método para enviar un correo de verificación de cuenta
+     *
+     * @return null
+     *   0: OK
+     * -11: Excepción
+     * -12: Fallo al crear el token de verificación
+     */
+    public function mandarCorreoVerificacionCuenta()
+    {
+        $response = [
+            "status" => "",
+            "code" => "",
+            "statusText" => "",
+            "data" => []
+        ];
+
+        try{
+            //Log de entrada
+            Log::debug("Entrando al mandarCorreoVerificacionCuenta de ApiAuthentication");
+
+            //Creo el nuevo token
+            $validez = now()->addMinute(env("TIEMPO_VALIDEZ_TOKEN_VERIFICACION_EN_MINUTOS"));
+            $result = AccountVerifyToken::crearTokenDeVerificación(auth()->user()->id, $validez);
+
+            if($result["code"] == 0){
+                //Se ha creado el token correctamente, ahora lo mando por correo
+                $tokenCreado = $result["data"];
+                auth()->user()->notify(new VerificarNuevaCuentaUsuario($tokenCreado->token));
+
+                $response["code"] = 0;
+                $response["status"] = 200;
+                $response["statusText"] = "ok";
+            }else{
+                $response["code"] = -12;
+                $response["status"] = 400;
+                $response["statusText"] = "ko";
+
+                Log::error("La creación del token no debería fallar",
+                    array(
+                        "response: " => $response
+                    )
+                );
+            }
+
+            //Log de salida
+            Log::debug("Saliendo del mandarCorreoVerificacionCuenta de ApiAuthentication",
+                array(
+                    "response: " => $response
+                )
+            );
+        }
+        catch(Exception $e){
+            $response["code"] = -11;
+            $response["status"] = 400;
+            $response["statusText"] = "ko";
+
+            Log::error($e->getMessage(),
+                array(
+                    "repsonse: " => $response
+                )
+            );
+        }
+
+        return $response;
     }
 }

@@ -10,7 +10,7 @@ class Decimo extends Model
 {
     use HasFactory;
 
-    protected $table = "sorteos";
+    protected $table = "decimos";
 
     //////////////////////
     ///// RELACIONES /////

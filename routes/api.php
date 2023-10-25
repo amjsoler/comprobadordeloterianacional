@@ -7,10 +7,10 @@ use Illuminate\Support\Facades\Route;
 /////// RUTAS DE AUTENTICACIÓN ///////
 //////////////////////////////////////
 
-Route::post("/login",
+Route::post("/iniciar-sesion",
     [ApiAuthentication::class, "login"]);
 
-Route::post("/register",
+Route::post("/registrarse",
     [ApiAuthentication::class, "register"]);
 
 //TODO Verificación de correo electrónico

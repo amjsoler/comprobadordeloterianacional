@@ -1,6 +1,14 @@
 <?php
 
+use App\Http\Controllers\web\Authentication;
 use Illuminate\Support\Facades\Route;
+
+Route::get("verificar-cuenta/{token}",
+    [
+        Authentication::class,
+        "verificarCuentaConToken"
+    ]
+)->name("verificarcuentacontoken");
 
 //TODO Crear un sorteo
 //TODO Editar un sorteo
