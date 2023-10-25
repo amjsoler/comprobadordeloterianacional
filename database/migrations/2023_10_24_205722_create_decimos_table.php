@@ -25,6 +25,8 @@ return new class extends Migration
             $table->unsignedBigInteger("sorteo");
             $table->foreign("sorteo")->on("sorteos")->references("id");
 
+            $table->decimal("premio")->nullable()->default(null);
+
             $table->timestamps();
         });
     }

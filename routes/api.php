@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ApiAuthentication;
+use App\Http\Controllers\DecimoController;
 use Illuminate\Support\Facades\Route;
 
 //////////////////////////////////////
@@ -19,24 +20,33 @@ Route::post("/recuperar-cuenta",
     ]
 );
 
-//TODO: Recuperar contraseña (este manda un mail con enlace que va a al form de la parte web)
 
-
-//////////////////////////////////////
-//////////////////////////////////////
-//////////////////////////////////////
 
 ////////////////////////////////
 /////// RUTAS DE DÉCIMOS ///////
 ////////////////////////////////
 
-//Todas estas llevan auth:sanctum y el policy(excepto crear)
-//TODO: Crear un nuevo décimo
-//TODO: Editar un décimo
-//TODO: Eliminar un décimo
+//TODO: Falta el auth:sanctum
+Route::get("/mis-decimos",
+    [DecimoController::class, "verMisDecimos"]
+);
 
-////////////////////////////////
-////////////////////////////////
-////////////////////////////////
+//TODO: Falta el auth:sanctum
+Route::post("/mis-decimos",
+    [DecimoController::class, "crearDecimo"]
+);
+
+//TODO: Falta el auth:sanctum y el can policy
+Route::put("/mis-decimos/{decimo}",
+    [DecimoController::class, "modificarDecimo"]
+);
+
+//TODO: Falta el auth:sanctum y el can policy
+Route::delete("/mis-decimos/{decimo}",
+    [DecimoController::class, "eliminarDecimo"]
+);
+
+
+
 
 //TODO Comprobardecimo

@@ -25,22 +25,4 @@ class Sorteo extends Model
     /////////////////////////////
     ///// MÉTODOS ESTÁTICOS /////
     /////////////////////////////
-
-    //TODO:
-    public static function crearSorteo()
-    {
-
-    }
-
-    //TODO:
-    public static function modificarSorteo()
-    {
-
-    }
-
-    //TODO:
-    public static function eliminarSorteo()
-    {
-
-    }
 }
