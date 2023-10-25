@@ -1,7 +1,13 @@
 <?php
 
 use App\Http\Controllers\web\Authentication;
+use App\Http\Controllers\web\ResultadoController;
+use App\Http\Controllers\web\SorteoController;
 use Illuminate\Support\Facades\Route;
+
+///////////////////////////////
+/////// RUTAS DE CUENTA ///////
+///////////////////////////////
 
 Route::get("verificar-cuenta/{token}",
     [
@@ -18,13 +24,67 @@ Route::post("recuperar-cuenta",
     [Authentication::class, "recuperarCuentaPost"]
 )->name("recuperarcuentapost");
 
-//TODO Crear un sorteo
-//TODO Editar un sorteo
-//TODO Eliminar un sorteo
 
-//TODO Crear un resultado
-//TODO Editar un resultado
-//TODO Eliminar un resultado
+
+////////////////////////////////
+/////// RUTAS DE SORTEOS ///////
+////////////////////////////////
+
+//TODO: Meter un auth:sanctum y un policy can
+Route::get("/sorteos",
+    [SorteoController::class, "verSorteos"]
+)->name("versorteos");
+
+//TODO: Meter un auth:sanctum y un policy can
+Route::post("/sorteos/crear",
+    [SorteoController::class, "crearSorteo"]
+)->name("crearsorteo");
+
+//TODO: Meter un auth:sanctum y un policy can
+Route::get("/sorteos/{sorteo}/editar",
+    [SorteoController::class, "editarSorteo"]
+)->name("editarsorteo");
+
+//TODO: Meter un auth:sanctum y un policy can
+Route::put("/sorteos/{sorteo}/modificar",
+    [SorteoController::class, "modificarSorteo"]
+)->name("modificarsorteo");
+
+//TODO: Meter un auth:sanctum y un policy can
+Route::get("/sorteos/{sorteo}/eliminar",
+    [SorteoController::class, "eliminarSorteo"]
+)->name("eliminarsorteo");
+
+
+
+///////////////////////////////////
+/////// RUTAS DE RESULTADOS ///////
+///////////////////////////////////
+
+//TODO: Meter un auth:sanctum y un policy can
+Route::get("/resultados",
+    [ResultadoController::class, "verResultados"]
+)->name("verresultados");
+
+//TODO: Meter un auth:sanctum y un policy can
+Route::post("/resultados/crear",
+    [ResultadoController::class, "crearResultado"]
+)->name("crearresultado");
+
+//TODO: Meter un auth:sanctum y un policy can
+Route::get("/resultados/{resultado}/editar",
+    [ResultadoController::class, "editarResultado"]
+)->name("editarresultado");
+
+//TODO: Meter un auth:sanctum y un policy can
+Route::put("/resultados/{resultado}/modificar",
+    [ResultadoController::class, "modificarResultado"]
+)->name("modificarresultado");
+
+//TODO: Meter un auth:sanctum y un policy can
+Route::get("/resultados/{resultado}/eliminar",
+    [ResultadoController::class, "eliminarResultado"]
+)->name("eliminarresultado");
 
 //TODO Esnifar sorteos disponibles de varias fuentes
 //TODO Esnifar resultados disponibles de varias fuentes

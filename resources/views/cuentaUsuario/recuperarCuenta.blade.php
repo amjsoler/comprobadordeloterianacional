@@ -9,3 +9,5 @@
 @else
     <p>Parece ser que el enlace no es válido o ha caducado. Intenta solicitar un nuevo correo desde la app</p>
 @endif
+
+<!-- TODO: Dar estilos a esta página y manejar errores de validación -->

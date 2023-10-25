@@ -12,6 +12,10 @@ class SorteosSeeder extends Seeder
      */
     public function run(): void
     {
-        Sorteo::factory()->count(40)->create();
+        for($i=1;$i<=102;$i++){
+            Sorteo::factory()->create([
+                "numero_sorteo" => $i
+            ]);
+        }
     }
 }

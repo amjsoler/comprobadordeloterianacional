@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('resultados', function (Blueprint $table) {
             $table->id();
 
-            $table->integer("numero");
+            $table->string("numero", 5);
             $table->integer("reintegro");
             $table->integer("serie")->nullable();
             $table->integer("fraccion")->nullable();

@@ -19,7 +19,6 @@ class SorteoFactory extends Factory
         return [
             'nombre' => $this->faker->name,
             'fecha' => $this->faker->date,
-            'numero_sorteo' => $this->faker->numberBetween(0, 102)
         ];
     }
 }
