@@ -14,8 +14,9 @@ return new class extends Migration
         Schema::create('sorteos', function (Blueprint $table) {
             $table->id();
             $table->string("nombre")->nullable();
-            $table->date("fecha")->nullable();
+            $table->date("fecha");
             $table->integer("numero_sorteo")->nullable();
+            $table->text("resultados")->nullable()->default(null);
             $table->timestamps();
         });
     }

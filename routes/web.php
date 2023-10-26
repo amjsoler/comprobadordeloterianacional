@@ -3,6 +3,7 @@
 use App\Http\Controllers\web\Authentication;
 use App\Http\Controllers\web\ResultadoController;
 use App\Http\Controllers\web\SorteoController;
+use App\Models\Sorteo;
 use Illuminate\Support\Facades\Route;
 
 ///////////////////////////////
@@ -55,6 +56,14 @@ Route::get("/sorteos/{sorteo}/eliminar",
     [SorteoController::class, "eliminarSorteo"]
 )->name("eliminarsorteo");
 
+Route::get("/sorteos/{sorteo}/resultados", function(Sorteo $sorteo){
+    return view("sorteos.verGuardarResultadosSorteo", compact("sorteo"));
+}
+)->name("resultadossorteover");
+
+Route::post("/sorteos/{sorteo}/resultados",
+    [SorteoController::class, "guardarResultadosSorteo"]
+)->name("resultadossorteoguardar");
 
 
 ///////////////////////////////////

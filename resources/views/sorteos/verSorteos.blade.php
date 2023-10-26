@@ -34,6 +34,7 @@
             <td>
                 <a href="{{ route("editarsorteo", $sorteo->id) }}">Editar</a>
                 <a href="{{ route("eliminarsorteo", $sorteo->id) }}">Eliminar</a>
+                <a href="{{ route("resultadossorteover", $sorteo->id) }}">Resultados</a>
             </td>
         </tr>
     @endforeach

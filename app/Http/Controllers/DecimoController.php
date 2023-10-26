@@ -2,10 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\Helpers;
+use App\Http\Requests\ComprobarDecimoFormRequest;
 use App\Http\Requests\CrearDecimoFormRequest;
 use App\Http\Requests\ModificarDecimoFormRequest;
 use App\Models\Decimo;
+use App\Models\Sorteo;
 use Exception;
+use Faker\Extension\Helper;
 use Illuminate\Support\Facades\Log;
 
 class DecimoController extends Controller
@@ -333,5 +337,91 @@ class DecimoController extends Controller
         );
     }
 
+    public function comprobarDecimo(ComprobarDecimoFormRequest $request)
+    {
+        $response = [
+            "status" => "",
+            "code" => "",
+            "statusText" => "",
+            "data" => []
+        ];
 
+        try{
+            //Log de entrada
+            Log::debug("Entrando al comprobarDecimo de DecimoController",
+                array(
+                    "request: " => $request->all()
+                )
+            );
+
+            //Primero compruebo si están ya disponibles los resultado
+            $resultResultadosSorteo = Sorteo::dameResultadosDadoElSorteo($request->get("sorteo"));
+
+            if($resultResultadosSorteo["code"] == 0){
+                $resultadosSorteo = $resultResultadosSorteo["data"];
+
+                //Si hay resultados hay que comprobar los datos pasados desde cliente
+                $resultComprobarPremios = Helpers::comprobarDecimo($resultadosSorteo,
+                    $request->get("numero"),
+                    $request->get("reintegro"),
+                    $request->get("serie"),
+                    $request->get("fraccion")
+                );
+
+                if($resultComprobarPremios["code"] == 0){
+                    $response["code"] = 0;
+                    $response["status"] = 200;
+                    $response["statusText"] = "ok";
+                    $response["data"] = $resultComprobarPremios["data"];
+                }else{
+                    $response["code"] = -12;
+                    $response["status"] = 400;
+                    $response["statusText"] = "ko";
+                }
+            }else if($resultResultadosSorteo["code"] == -2){
+                //No se han encontrado resultados
+                $response["code"] = 0;
+                $response["status"] = 200;
+                $response["statusText"] = "ok";
+                $response["data"] = "";
+            }
+            else{
+                $response["code"] = -12;
+                $response["status"] = 400;
+                $response["statusText"] = "ko";
+
+                Log::error("No debería fallar la consulta de resultados",
+                    array(
+                        "request: " => $request->all(),
+                        "response: " => $response
+                    )
+                );
+            }
+
+            //Log de salida
+            Log::debug("Saliendo del comprobarDecimo de DecimoController",
+                array(
+                    "request: " => $request->all(),
+                    "response: " => $response
+                )
+            );
+        }
+        catch(Exception $e){
+            $response["code"] = -11;
+            $response["status"] = 400;
+            $response["statusText"] = "ko";
+
+            Log::error($e->getMessage(),
+                array(
+                    "request: " => $request->all(),
+                    "response: " => $response
+                )
+            );
+        }
+
+        return response()->json(
+            $response["data"],
+            $response["status"]
+        );
+    }
 }

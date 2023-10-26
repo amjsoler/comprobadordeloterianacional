@@ -14,10 +14,7 @@ return new class extends Migration
         Schema::create('resultados', function (Blueprint $table) {
             $table->id();
 
-            $table->string("numero", 5);
-            $table->integer("reintegro");
-            $table->integer("serie")->nullable();
-            $table->integer("fraccion")->nullable();
+            $table->string("premios");
 
             $table->unsignedBigInteger("sorteo");
             $table->foreign("sorteo")->on("sorteos")->references("id");

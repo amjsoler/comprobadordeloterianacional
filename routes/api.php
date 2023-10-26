@@ -48,5 +48,12 @@ Route::delete("/mis-decimos/{decimo}",
 
 
 
+/////////////////////////////////////
+/////// RUTAS DE COMPROBACIÓN ///////
+/////////////////////////////////////
+
+Route::post("/comprobar-decimo",
+    [DecimoController::class, "comprobarDecimo"]
+);
 
 //TODO Comprobardecimo

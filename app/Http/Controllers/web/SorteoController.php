@@ -5,6 +5,7 @@ namespace App\Http\Controllers\web;
 use App\Http\Controllers\Controller;
 use App\Models\Sorteo;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 
 class SorteoController extends Controller
 {
@@ -45,6 +46,16 @@ class SorteoController extends Controller
     public function eliminarSorteo(Sorteo $sorteo)
     {
         $sorteo->delete();
+
+        return redirect(route("versorteos"));
+    }
+
+    public function guardarResultadosSorteo(Sorteo $sorteo, Request $request)
+    {
+        $resultados = $request->get("resultados");
+
+        $sorteo->resultados = $resultados;
+        $sorteo->save();
 
         return redirect(route("versorteos"));
     }
