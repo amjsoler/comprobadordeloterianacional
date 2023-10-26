@@ -105,6 +105,6 @@ Route::get("/resultados/{resultado}/eliminar",
 
 
 
-Route::get("/prueba-snifeteo",
+Route::get("/prueba-esnifeteo",
     [SorteoController::class, "esnifarSorteos"]
 );

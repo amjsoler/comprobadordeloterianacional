@@ -15,7 +15,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             UsersSeeder::class,
             SorteosSeeder::class,
-            ResultadosSeeder::class,
+            //ResultadosSeeder::class,
             DecimosSeeder::class,
         ]);
     }
