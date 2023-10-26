@@ -4,6 +4,8 @@ use App\Http\Controllers\web\Authentication;
 use App\Http\Controllers\web\ResultadoController;
 use App\Http\Controllers\web\SorteoController;
 use App\Models\Sorteo;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
 
 ///////////////////////////////
@@ -97,3 +99,12 @@ Route::get("/resultados/{resultado}/eliminar",
 
 //TODO Esnifar sorteos disponibles de varias fuentes
 //TODO Esnifar resultados disponibles de varias fuentes
+
+
+
+
+
+
+Route::get("/prueba-snifeteo",
+    [SorteoController::class, "esnifarSorteos"]
+);
