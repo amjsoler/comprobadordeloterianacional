@@ -1,5 +1,6 @@
 <?php
 
+use App\Helpers\Helpers;
 use App\Http\Controllers\web\Authentication;
 use App\Http\Controllers\web\ResultadoController;
 use App\Http\Controllers\web\SorteoController;
