@@ -103,9 +103,7 @@ Route::get("/resultados/{resultado}/eliminar",
 
 
 
-
-
-
-Route::get("/prueba-esnifeteo",
-    [SorteoController::class, "esnifarSorteos"]
+Route::get("/esnifeteo-resultados", function(){
+        Helpers::esnifarYGuardarResultadosDisponibles();
+    }
 );

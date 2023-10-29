@@ -64,9 +64,4 @@ class SorteoController extends Controller
 
         return redirect(route("versorteos"));
     }
-
-    public function esnifarSorteos()
-    {
-        Helpers::esnifarYGuardarNuevosSorteos();
-    }
 }

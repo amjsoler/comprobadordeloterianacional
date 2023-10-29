@@ -1,12 +1,15 @@
 <?php
 namespace App\Helpers;
 
+use App\Http\Controllers\web\ResultadoController;
+use App\Models\Resultado;
 use App\Models\Sorteo;
 use Carbon\Carbon;
 use DOMDocument;
 use Exception;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\URL;
 
 class Helpers
 {
@@ -544,6 +547,58 @@ class Helpers
     }
 
     /**
+     * Método que devuelve las URL de las que esnifar los resultados
+     *
+     * @return [string]
+     *  0: OK
+     * -1: Excepción
+     * -2: No está puesta la propiedad en el env
+     */
+    public static function dameURLSParaEsnifarResultados()
+    {
+        $response = [];
+
+        Log::debug("Entrando al dameURLSParaEsnifarResultados de helpers");
+
+        try{
+            //Leemos las URLS desde las que esnifar
+            $urls = env("URLS_ESNIFAR_RESULTADOS");
+
+            if($urls){
+                //Separamos cada url
+                $urlsArr = explode(";", $urls);
+
+                $response["code"] = 0;
+                $response["data"] = $urlsArr;
+            }else{
+                $response["code"] = -2;
+
+                Log::error("Las URLS para esnifar no están puestas. Guardalas con la clave: URLS_ESNIFAR_RESULTADOS separadas por ; si hay más de una",
+                    array(
+                        "response: " => $response
+                    )
+                );
+            }
+        }catch(Exception $e){
+            $response["code"] = -1;
+
+            Log::error($e->getMessage(),
+                array(
+                    "response: " => $response
+                )
+            );
+        }
+
+        Log::debug("Saliendo del dameURLSParaEsnifarSorteos de helpers",
+            array(
+                "response: " => $response
+            )
+        );
+
+        return $response;
+    }
+
+    /**
      * //Método que se encarga de consultar la url pasada por param y extraer la fecha, nombre y número de sorteo de la fuente
      *
      * @param string $url La url a consultar
@@ -621,6 +676,83 @@ class Helpers
     }
 
     /**
+     * Método que devuelve un array de arrays con los resultados de la url pasáda como parámetros
+     *
+     * @param string $url La url de la que esnifar
+     *
+     * @return [{fecha => [{nombre => premio}]}]
+     *  0: OK
+     * -1: Excepción
+     * -2:
+     */
+    private static function esnifaResultadosDisponiblesEnURL(string $url)
+    {
+        $response = [];
+        $resultadosFechas = [];
+
+        Log::debug("Entrando al esnifaResultadosDisponiblesEnURL de helpers",
+            array(
+                "request: " => $url
+            )
+        );
+
+        try{
+            $sorteosObtenidos = [];
+
+            //Hacemos la petición y creamos el objeto DOM para movernos
+            $contenido = Http::get($url)->body();
+            $contenidoHTML = new DOMDocument;
+            libxml_use_internal_errors(true);
+            $contenidoHTML->loadHTML($contenido);
+
+            //Buscamos el desplegable de sorteos y leemos los options que tiene
+            $optionsSelectResultados = $contenidoHTML->getElementById("loteria_fecha_sel")
+                ->getElementsByTagName("option");
+
+            //Iteramos por los options (cada sorteo)
+            for($i=0;$i<$optionsSelectResultados->count()-1;$i++){
+                //extraigo la cadena del nombre
+                $fechaSorteo = $optionsSelectResultados->item($i)->textContent;
+                $optionValue = $optionsSelectResultados->item($i)->attributes->getNamedItem("value");
+
+                //Con la fecha de sorteo y el value del option, peticiono los datos de la tabla de resultados
+                $urlAux =
+                $tablaResultadosAux = Http::get($url)->body();
+                $contenidoHTML = new DOMDocument;
+                libxml_use_internal_errors(true);
+                $contenidoHTML->loadHTML($contenido);
+
+                //obtengo el dominio de la url
+                $urlAux = new URL($url);
+$urlAux->
+                Http::get($url)->header()
+
+
+                //Una vez tengo todos los datos, los guardo en el array de resultados
+                array_push($resultadosFechas, $fechaSorteo);
+            }
+
+            $response["data"] = $resultadosFechas;
+        }catch(Exception $e){
+            $response["code"] = -1;
+
+            Log::error($e->getMessage(),
+                array(
+                    "response: " => $response
+                )
+            );
+        }
+
+        Log::debug("Saliendo del esnifaResultadosDisponiblesEnURL de helpers",
+            array(
+                "response: " => $response
+            )
+        );
+
+        return $response;
+    }
+
+    /**
      * Método que devuelve un array de sorteos que no estén en la base de datos
      *
      * @param mixed $sorteosAInsertar Los sorteos potenciales a ser insertados en bd
@@ -688,6 +820,145 @@ class Helpers
         Log::debug("Saliendo del dameArraySorteosNoExistentesEnBD de helpers",
             array(
                 "request: " => compact("sorteosAInsertar", "sorteosExistentes"),
+                "response: " => $response
+            )
+        );
+
+        return $response;
+    }
+
+    /**
+     * Método que esnifa el contenido de los resultados de las URLS y los almacena en BD
+     *
+     * @return void
+     *  0: OK
+     * -1: Excepción
+     * -2: Las URLS no están configuradas en el env
+     */
+    public static function esnifarYGuardarResultadosDisponibles()
+    {
+        $response = [];
+
+        Log::debug("Entrando al esnifarResultadosDisponibles de helpers");
+
+        try{
+            //Leemos las URLS desde las que esnifar resultados
+            $resultURLS = self::dameURLSParaEsnifarResultados();
+
+            if($resultURLS["code"] == 0){
+                //Si están bien las urls paso a iterar sobre ellas y operar
+                $urls = $resultURLS["data"];
+                $arrayFechasResultadosDisponibles = [];
+
+                //Metraigo las fechas existentes en BD
+                $arrayFechasResultadosExistentesEnBD = Resultado::dameFechasExistentesResultadosBD();
+
+                if($arrayFechasResultadosExistentesEnBD["code"] == 0){
+                    $arrayFechasResultadosExistentesEnBD = $arrayFechasResultadosExistentesEnBD["data"];
+
+                    foreach($urls as $url){
+                        //Me traigo un array de arrays con todos los premios de cada sorteo
+                        $result = self::esnifaResultadosDisponiblesEnURL($url);
+
+                        if($result["code"] == 0){
+                            $datos = $result["data"];
+
+                            array_push($arrayFechasResultadosDisponibles, $datos);
+                        }
+                    }
+
+                    //Una vez tengo los resultados de cada url y los resultados existentes en bd, descarto los que ya tenga guardados en bd
+                    foreach(array){
+
+                    }
+
+
+
+
+
+
+
+
+                    //TODO
+                    $sorteosDefinitivos = $arrayDeDatosProvisionales[0]; //TODO:
+
+                    //Ahora con el array de sorteos potenciales a insertar, consulto en BD los que ya tengo
+                    $result = Sorteo::dameFechasSorteoInArrayDeFechas(array_column($sorteosDefinitivos, "fecha"));
+
+                    if($result["code"] == 0){
+                        $sorteosExistentes = $result["data"];
+
+                        //Una vez tenga los dos arrays, hay que sacar un array resultante de la diferencia entre uno y otro, es decir,
+                        //las fechas del array de sorteosDefinitivos que no estén en los sorteosExistentes
+                        $result = self::dameArraySorteosNoExistentesEnBD($sorteosDefinitivos, $sorteosExistentes);
+
+                        if($result["code"] == 0){
+                            $sorteosAInsertar = $result["data"];
+
+                            $result = Sorteo::crearSorteosDadoUnArrayDeSorteos($sorteosAInsertar);
+
+                            if($result["code"] == 0){
+                                $response["code"] = 0;
+                            }else{
+                                $response["code"] = -5;
+
+                                Log::error("Error al insertar el array de sorteos en la BD",
+                                    array(
+                                        "response: " => $response
+                                    )
+                                );
+                            }
+                        }
+                        else{
+                            //Fallo al sacar los elementos que difieren entre arrays
+                            $response["code"] = -4;
+
+                            Log::error("Esto no debería fallar si los arrays están bien formados.",
+                                array(
+                                    "response: " => $response
+                                )
+                            );
+                        }
+                    }else{
+                        //Sin el listado de fechas existentes no puedo comparar por tanto no puede seguir la ejecución
+                        $response["code"] = -3;
+
+                        Log::error("Esto no debería fallar. Símplemente es la ejecución de un select",
+                            array(
+                                "response: " => $response
+                            )
+                        );
+                    }
+                }else{
+                    $response["code"] = -3;
+
+                    Log::error("Error al leer las fechas existentes de resutlados en bd",
+                        array(
+                            "response: " => $response
+                        )
+                    );
+                }
+            }else{
+                $response["code"] = -2;
+
+                Log::error("Error al leer las urls de configuración",
+                    array(
+                        "response: " => $response
+                    )
+                );
+            }
+        }catch(Exception $e){
+            $response["code"] = -1;
+
+            Log::error($e->getMessage(),
+                array(
+                    "response: " => $response
+                )
+            );
+        }
+
+        Log::debug("Saliendo del esnifarResultadosDisponibles de helpers",
+            array(
                 "response: " => $response
             )
         );

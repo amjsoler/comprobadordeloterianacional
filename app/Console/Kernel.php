@@ -14,7 +14,8 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        $schedule->job(new EsnifarSorteos(), "jobs", "database")->everyMinute();
+        $schedule->job(new EsnifarSorteos(), "jobs", "database")->everyTenMinutes();
+
     }
 
     /**

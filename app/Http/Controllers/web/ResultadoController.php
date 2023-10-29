@@ -57,4 +57,9 @@ class ResultadoController extends Controller
 
         return redirect(route("verresultados"));
     }
+
+    public function esnifarResultados()
+    {
+
+    }
 }
