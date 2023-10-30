@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -17,11 +18,12 @@ class Sorteo extends Model
     //////////////////////
     ///// RELACIONES /////
     //////////////////////
-
     public function resultado() : HasOne
     {
         return $this->hasOne(Resultado::class, "sorteo", "id");
     }
+
+
 
     /////////////////////////////
     ///// MÉTODOS ESTÁTICOS /////
@@ -179,6 +181,105 @@ class Sorteo extends Model
         Log::debug("Saliendo del crearSorteosDadoUnArrayDeSorteos del modelo Sorteo",
             array(
                 "request: " => compact("sorteosAInsertar"),
+                "response: " => $response
+            )
+        );
+
+        return $response;
+    }
+
+    /**
+     * Devuelve las fechas de resultados existentes en BD
+     *
+     * @return [fechas]
+     *  0: OK
+     * -1: Excepción
+     * -2: Error en la consulta
+     */
+    public static function dameFechasExistentesResultadosBDDadoArrayFechas($fechas)
+    {
+        $response = [
+            "code" => "",
+            "data" => ""
+        ];
+
+        try {
+            //Log de entrada
+            Log::debug("Entrando al dameFechasExistentesResultadosBDDadoArrayFechas de Resultado");
+
+            $fechasResultadosExistentes = Sorteo::whereNotNull("resultados")
+                ->whereIn("fecha", $fechas)
+                ->get("fecha")
+                ->toArray();
+
+            $response["code"] = 0;
+            $response["data"] = $fechasResultadosExistentes;
+
+        } catch (Exception $e) {
+            $response["code"] = -1;
+
+            Log::error($e->getMessage(),
+                array(
+                    "response: " => $response
+                )
+            );
+        }
+
+        //Log de salida
+        Log::debug("Saliendo del dameFechasExistentesResultadosBDDadoArrayFechas de Resultado",
+            array(
+                "response: " => $response
+            )
+        );
+
+        return $response;
+    }
+
+    public static function insertarNuevoResultadoDadoArrayDeResultados($resultadoAux)
+    {
+        $response = [
+            "code" => "",
+            "data" => ""
+        ];
+
+        try {
+            //Log de entrada
+            Log::debug("Entrando al insertarNuevoResultadoDadoArrayDeResultados de Sorteo",
+                array(
+                    "request: " => $resultadoAux
+                )
+            );
+
+            $cadena = "";
+
+            foreach($resultadoAux->premios as $premio){
+                $cadena.=$premio["nombre"].";".$premio["numero"].";".$premio["premio"]."\n";
+            }
+
+            $fechaFormateada = Carbon::createFromFormat("d/m/y", $resultadoAux->fecha)->format("Y-m-d");
+            $sorteo = Sorteo::where("fecha", $fechaFormateada)->firstOrFail();
+
+            $sorteo->resultados = $cadena;
+
+            $sorteo->save();
+
+
+            $response["code"] = 0;
+        } catch (Exception $e) {
+            $response["code"] = -1;
+
+            Log::error($e->getMessage(),
+                array(
+                    "request: " => $resultadoAux,
+                    "response: " => $response
+                )
+            );
+        }
+
+        //Log de salida
+        Log::debug("Saliendo del insertarNuevoResultadoDadoArrayDeResultados de Sorteo",
+            array(
+                "request: " => $resultadoAux,
                 "response: " => $response
             )
         );

@@ -7,6 +7,7 @@ use App\Models\Sorteo;
 use Carbon\Carbon;
 use DOMDocument;
 use Exception;
+use Faker\Extension\Helper;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\URL;
@@ -676,11 +677,11 @@ class Helpers
     }
 
     /**
-     * Método que devuelve un array de arrays con los resultados de la url pasáda como parámetros
+     * Método que devuelve un array de arrays con los resultados de la url pasada como parámetros
      *
      * @param string $url La url de la que esnifar
      *
-     * @return [{fecha => [{nombre => premio}]}]
+     * @return [{fecha => [nombre, numero, premio]}]
      *  0: OK
      * -1: Excepción
      * -2:
@@ -688,7 +689,7 @@ class Helpers
     private static function esnifaResultadosDisponiblesEnURL(string $url)
     {
         $response = [];
-        $resultadosFechas = [];
+        $resultadosDisponibles = [];
 
         Log::debug("Entrando al esnifaResultadosDisponiblesEnURL de helpers",
             array(
@@ -710,29 +711,53 @@ class Helpers
                 ->getElementsByTagName("option");
 
             //Iteramos por los options (cada sorteo)
-            for($i=0;$i<$optionsSelectResultados->count()-1;$i++){
+            for($i=0;$i<count($optionsSelectResultados);$i++){
+                $premiosSorteoAux = [];
+
                 //extraigo la cadena del nombre
                 $fechaSorteo = $optionsSelectResultados->item($i)->textContent;
-                $optionValue = $optionsSelectResultados->item($i)->attributes->getNamedItem("value");
+                $optionValue = $optionsSelectResultados->item($i)->attributes->getNamedItem("value")->textContent;
+
+                //Ahora extraigo el dominio de la url que estoy consultando para montar una nueva petición
+                $segmentosUrl = parse_url($url);
+                $urlServicioResultados = "https://" . $segmentosUrl["host"] . "/mod_ultimos_resultados.php?idiomaQuery=es&fechaQuery=".$optionValue."&juegoQuery=loteria";
 
                 //Con la fecha de sorteo y el value del option, peticiono los datos de la tabla de resultados
-                $urlAux =
-                $tablaResultadosAux = Http::get($url)->body();
                 $contenidoHTML = new DOMDocument;
                 libxml_use_internal_errors(true);
-                $contenidoHTML->loadHTML($contenido);
+                $contenidoHTML->loadHTML(Http::get($urlServicioResultados)->body());
 
-                //obtengo el dominio de la url
-                $urlAux = new URL($url);
-$urlAux->
-                Http::get($url)->header()
+                $tablaResultados = $contenidoHTML->getElementById("banner_r_loteria_premios");
+                $arrayFilasResultados = $tablaResultados->getElementsByTagName("tr");
 
+                //Ahora recorro la tabla para quedarme con cada resultado
+                //Itero desde el 1 para saltarme la cabecera de la tabla
+                for($j=1;$j<count($arrayFilasResultados);$j++){
+                    $nombreAux = $arrayFilasResultados->item($j)->childNodes->item(1)->nodeValue;
+                    $numeroAux = $arrayFilasResultados->item($j)->childNodes->item(3)->nodeValue;
+                    $premioAux = $arrayFilasResultados->item($j)->childNodes->item(5)->nodeValue;
 
-                //Una vez tengo todos los datos, los guardo en el array de resultados
-                array_push($resultadosFechas, $fechaSorteo);
+                    //trato la cadena de premio para quitar todos los caracteres no numericos
+                    $premioAux = str_replace(".", "", $premioAux);
+                    $premioAux = str_replace("€", "", $premioAux);
+                    $premioAux = str_replace(" ", "", $premioAux);
+
+                    //Trato la cadena de numeros recibidos
+                    $numeroAux = str_replace("*", "", $numeroAux);
+                    $numeroAux = str_replace(",", "&", $numeroAux);
+                    $numeroAux = str_replace("-", "&", $numeroAux);
+                    $numeroAux = str_replace(" ", "", $numeroAux);
+
+                    //Meto los datos en el array de resultados
+                    array_push($premiosSorteoAux, array("nombre" => $nombreAux, "numero" => $numeroAux, "premio" => $premioAux));
+                }
+
+                //Cuando tengo en el array todos los posibles premios del sorteo, lo guardo en el array general de todos los sorteos
+                array_push($resultadosDisponibles, (object)["fecha" => $fechaSorteo, "premios" => $premiosSorteoAux]);
             }
 
-            $response["data"] = $resultadosFechas;
+            $response["data"] = $resultadosDisponibles;
+            $response["code"] = 0;
         }catch(Exception $e){
             $response["code"] = -1;
 
@@ -828,6 +853,82 @@ $urlAux->
     }
 
     /**
+     * Devuelve una lista de resultados a insertar que no estén en la lista de resultados existentes
+     *
+     * @param $resultadosAInsertar Los resultados potenciales a ser insertados
+     * @param $resultadosExistentes Los resultados que ya hay en bd
+     *
+     * @return array Array con los resultados a insertar definitivo
+     *  0: OK
+     * -1: excepción
+     */
+    private static function dameArrayResultadosNoExistentesEnBD($resultadosAInsertar, $resultadosExistentes)
+    {
+        $response = [];
+        $resultadosEncontrados = [];
+
+        Log::debug("Entrando al dameArrayResultadosNoExistentesEnBD de helpers",
+            array(
+                "request: " => compact("resultadosAInsertar", "resultadosExistentes")
+            )
+        );
+
+        try{
+            //Busco por cada sorteo que tengo en bd, si está en el array a insertar
+            foreach($resultadosExistentes as $resultadoExistente){
+                $encontrado = array_filter($resultadosAInsertar, function($obj) use ($resultadoExistente){
+                    dd($resultadoExistente);
+                    if($obj->fecha == $resultadoExistente){
+                        return true;
+                    }else{
+                        return false;
+                    }
+                });
+
+                //Meto los sorteos encontrados en bd en un array para darle la vuelta a continuación
+                $resultadosEncontrados = array_merge($encontrado, $resultadosEncontrados);
+            }
+
+            //Saco los elementos del resultadoAInsertar que no están en el array de resultadosEncontrados
+            foreach($resultadosAInsertar as $key => $resultadoAInsertar){
+                $encontrado = false;
+                foreach($resultadosEncontrados as $resultadoEncontrado){
+                    //Si se ha encontrado lo quito del array de resultados a insertar
+                    if($resultadoEncontrado->fecha == $resultadoAInsertar->fecha){
+                        $encontrado = true;
+                    }
+                }
+
+                if($encontrado){
+                    unset($resultadosAInsertar[$key]);
+                }
+            }
+
+            $response["data"] = $resultadosAInsertar;
+            $response["code"] = 0;
+        }
+        catch(Exception $e){
+            $response["code"] = -1;
+
+            Log::error($e->getMessage(),
+                array(
+                    "request: " => compact("resultadosAInsertar", "resultadosExistentes"),
+                    "response: " => $response
+                )
+            );
+        }
+
+        Log::debug("Saliendo del dameArrayResultadosNoExistentesEnBD de helpers",
+            array(
+                "request: " => compact("resultadosAInsertar", "resultadosExistentes"),
+                "response: " => $response
+            )
+        );
+
+        return $response;
+    }
+
+    /**
      * Método que esnifa el contenido de los resultados de las URLS y los almacena en BD
      *
      * @return void
@@ -848,82 +949,63 @@ $urlAux->
             if($resultURLS["code"] == 0){
                 //Si están bien las urls paso a iterar sobre ellas y operar
                 $urls = $resultURLS["data"];
-                $arrayFechasResultadosDisponibles = [];
+                $arrayResultadosDisponibles = [];
 
-                //Metraigo las fechas existentes en BD
-                $arrayFechasResultadosExistentesEnBD = Resultado::dameFechasExistentesResultadosBD();
+                foreach($urls as $url){
+                    //Me traigo un array de arrays con todos los premios de cada sorteo
+                    $result = self::esnifaResultadosDisponiblesEnURL($url);
+
+                    if($result["code"] == 0){
+                        $datos = $result["data"];
+
+                        array_push($arrayResultadosDisponibles, $datos);
+                    }
+                }
+
+                //TODO: Saco el cruzamiento de datos de las distintas fuentes para mitigar errores
+                $arrayResultadosDisponiblesFinal = $arrayResultadosDisponibles[0];
+
+                //Saco un array de fechas obtenidas del array de resultados disponibles para consultar los existentes
+                $arrayFechasResultadosDisponibles = array_column($arrayResultadosDisponiblesFinal, "fecha");
+
+                foreach($arrayFechasResultadosDisponibles as $index=>$fechaux){
+                    $aux = explode(" ", $fechaux);
+                    $arrayFechasResultadosDisponibles[$index] = Carbon::createFromFormat("d/m/y", $aux[count($aux)-1])->format("Y-m-d");
+                }
+
+                //Me traigo las fechas existentes en BD que estén en el array de resultados obtenidos
+                $arrayFechasResultadosExistentesEnBD = Sorteo::dameFechasExistentesResultadosBDDadoArrayFechas($arrayFechasResultadosDisponibles);
 
                 if($arrayFechasResultadosExistentesEnBD["code"] == 0){
                     $arrayFechasResultadosExistentesEnBD = $arrayFechasResultadosExistentesEnBD["data"];
 
-                    foreach($urls as $url){
-                        //Me traigo un array de arrays con todos los premios de cada sorteo
-                        $result = self::esnifaResultadosDisponiblesEnURL($url);
-
-                        if($result["code"] == 0){
-                            $datos = $result["data"];
-
-                            array_push($arrayFechasResultadosDisponibles, $datos);
-                        }
-                    }
-
                     //Una vez tengo los resultados de cada url y los resultados existentes en bd, descarto los que ya tenga guardados en bd
-                    foreach(array){
+                    $arrayResultadosDisponiblesDefinitivo = self::dameArrayResultadosNoExistentesEnBD($arrayResultadosDisponiblesFinal, $arrayFechasResultadosExistentesEnBD);
 
-                    }
+                    if($arrayResultadosDisponiblesDefinitivo["code"] == 0){
+                        $arrayResultadosDisponiblesDefinitivo = $arrayResultadosDisponiblesDefinitivo["data"];
 
+                        //Ahora con el array definitivo, inserto los resultados en BD
+                        foreach($arrayResultadosDisponiblesDefinitivo as $resultadoAux){
+                            $resultInsercion = Sorteo::insertarNuevoResultadoDadoArrayDeResultados($resultadoAux);
 
-
-
-
-
-
-
-                    //TODO
-                    $sorteosDefinitivos = $arrayDeDatosProvisionales[0]; //TODO:
-
-                    //Ahora con el array de sorteos potenciales a insertar, consulto en BD los que ya tengo
-                    $result = Sorteo::dameFechasSorteoInArrayDeFechas(array_column($sorteosDefinitivos, "fecha"));
-
-                    if($result["code"] == 0){
-                        $sorteosExistentes = $result["data"];
-
-                        //Una vez tenga los dos arrays, hay que sacar un array resultante de la diferencia entre uno y otro, es decir,
-                        //las fechas del array de sorteosDefinitivos que no estén en los sorteosExistentes
-                        $result = self::dameArraySorteosNoExistentesEnBD($sorteosDefinitivos, $sorteosExistentes);
-
-                        if($result["code"] == 0){
-                            $sorteosAInsertar = $result["data"];
-
-                            $result = Sorteo::crearSorteosDadoUnArrayDeSorteos($sorteosAInsertar);
-
-                            if($result["code"] == 0){
+                            if($resultInsercion["code"] == 0){
                                 $response["code"] = 0;
                             }else{
                                 $response["code"] = -5;
 
-                                Log::error("Error al insertar el array de sorteos en la BD",
+                                Log::error("Esto no debería fallar. Método para insertar un nuevo resultado",
                                     array(
                                         "response: " => $response
                                     )
                                 );
                             }
                         }
-                        else{
-                            //Fallo al sacar los elementos que difieren entre arrays
-                            $response["code"] = -4;
-
-                            Log::error("Esto no debería fallar si los arrays están bien formados.",
-                                array(
-                                    "response: " => $response
-                                )
-                            );
-                        }
                     }else{
-                        //Sin el listado de fechas existentes no puedo comparar por tanto no puede seguir la ejecución
-                        $response["code"] = -3;
+                        //Fallo al sacar los elementos que difieren entre arrays
+                        $response["code"] = -4;
 
-                        Log::error("Esto no debería fallar. Símplemente es la ejecución de un select",
+                        Log::error("Esto no debería fallar si los arrays están bien formados.",
                             array(
                                 "response: " => $response
                             )
