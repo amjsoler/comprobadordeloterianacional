@@ -4,6 +4,8 @@ namespace App\Helpers;
 use App\Http\Controllers\web\ResultadoController;
 use App\Models\Resultado;
 use App\Models\Sorteo;
+use App\Models\User;
+use App\Notifications\NuevosResultadosDisponibles;
 use Carbon\Carbon;
 use DOMDocument;
 use Exception;
@@ -968,6 +970,7 @@ class Helpers
                     if($arrayResultadosDisponiblesDefinitivo["code"] == 0){
                         $arrayResultadosDisponiblesDefinitivo = $arrayResultadosDisponiblesDefinitivo["data"];
 
+                        /*
                         //Ahora con el array definitivo, inserto los resultados en BD
                         foreach($arrayResultadosDisponiblesDefinitivo as $resultadoAux){
                             $resultInsercion = Sorteo::insertarNuevoResultadoDadoArrayDeResultados($resultadoAux);
@@ -983,6 +986,12 @@ class Helpers
                                     )
                                 );
                             }
+                        } */
+
+                        if(count($arrayResultadosDisponiblesDefinitivo) > 0){
+                            //Enviar por mail la cadena de resultados, se meterán a mano por el momento
+                            $user = User::find(1);
+                            $user->notify(new NuevosResultadosDisponibles($arrayResultadosDisponiblesDefinitivo));
                         }
                     }else{
                         //Fallo al sacar los elementos que difieren entre arrays
