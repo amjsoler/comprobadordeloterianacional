@@ -855,8 +855,8 @@ class Helpers
     /**
      * Devuelve una lista de resultados a insertar que no estén en la lista de resultados existentes
      *
-     * @param $resultadosAInsertar Los resultados potenciales a ser insertados
-     * @param $resultadosExistentes Los resultados que ya hay en bd
+     * @param $resultadosAInsertar
+     * @param $resultadosExistentes
      *
      * @return array Array con los resultados a insertar definitivo
      *  0: OK
@@ -872,39 +872,23 @@ class Helpers
                 "request: " => compact("resultadosAInsertar", "resultadosExistentes")
             )
         );
-
         try{
             //Busco por cada sorteo que tengo en bd, si está en el array a insertar
             foreach($resultadosExistentes as $resultadoExistente){
                 $encontrado = array_filter($resultadosAInsertar, function($obj) use ($resultadoExistente){
-                    dd($resultadoExistente);
-                    if($obj->fecha == $resultadoExistente){
+                    $aux = explode(" ", $obj->fecha);
+                    $aux = Carbon::createFromFormat("d/m/y", $aux[count($aux)-1])->format("Y-m-d");
+
+                    if($aux == $resultadoExistente["fecha"]){
                         return true;
-                    }else{
-                        return false;
                     }
                 });
 
                 //Meto los sorteos encontrados en bd en un array para darle la vuelta a continuación
-                $resultadosEncontrados = array_merge($encontrado, $resultadosEncontrados);
+                $resultadosEncontrados = array_merge($resultadosEncontrados, $encontrado);
             }
 
-            //Saco los elementos del resultadoAInsertar que no están en el array de resultadosEncontrados
-            foreach($resultadosAInsertar as $key => $resultadoAInsertar){
-                $encontrado = false;
-                foreach($resultadosEncontrados as $resultadoEncontrado){
-                    //Si se ha encontrado lo quito del array de resultados a insertar
-                    if($resultadoEncontrado->fecha == $resultadoAInsertar->fecha){
-                        $encontrado = true;
-                    }
-                }
-
-                if($encontrado){
-                    unset($resultadosAInsertar[$key]);
-                }
-            }
-
-            $response["data"] = $resultadosAInsertar;
+            $response["data"] = $resultadosEncontrados;
             $response["code"] = 0;
         }
         catch(Exception $e){
@@ -978,7 +962,6 @@ class Helpers
 
                 if($arrayFechasResultadosExistentesEnBD["code"] == 0){
                     $arrayFechasResultadosExistentesEnBD = $arrayFechasResultadosExistentesEnBD["data"];
-
                     //Una vez tengo los resultados de cada url y los resultados existentes en bd, descarto los que ya tenga guardados en bd
                     $arrayResultadosDisponiblesDefinitivo = self::dameArrayResultadosNoExistentesEnBD($arrayResultadosDisponiblesFinal, $arrayFechasResultadosExistentesEnBD);
 
@@ -1046,5 +1029,40 @@ class Helpers
         );
 
         return $response;
+    }
+
+    public static function convertirNombrePremioANombreDeSistema(string $nombre)
+    {
+        switch($nombre)
+        {
+            case "Especial (1º+Ser.+Fracc.)":
+                return "especial";
+                case "1er. Premio":
+                return "primero";
+            case "2º Premio":
+                return "segundo";
+            case "4 últimas cifras":
+                return "4cifras";
+            case "3 últimas cifras":
+                return "3cifras";
+            case "2 últimas cifras":
+                return "2cifras";
+            case "Ant. y Post. al 1er P":
+                return "aproximacionesprimero";
+            case "Ant. y Post. al 2º P":
+                return "aproximacionessegundo";
+            case "A la centena del 1er P":
+                return "centenaprimero";
+            case "A la centena del 2º P":
+                return "centenasegundo";
+            case "Terminac. 3 cifras 1er P":
+                return "3terminacionesprimero";
+            case "Terminac. 2 cifras 1er P":
+                return "2terminacionesprimero";
+            case "Terminación 1er P":
+                return "1terminacionprimero";
+            case "Reintegros":
+                return "reintegros";
+        }
     }
 }

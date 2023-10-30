@@ -55,5 +55,3 @@ Route::delete("/mis-decimos/{decimo}",
 Route::post("/comprobar-decimo",
     [DecimoController::class, "comprobarDecimo"]
 );
-
-//TODO Comprobardecimo

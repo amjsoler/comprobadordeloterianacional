@@ -337,6 +337,17 @@ class DecimoController extends Controller
         );
     }
 
+    /**
+     * Método que se usa para comprobar si el décimo pasado por parametro está premiado
+     *
+     * @param ComprobarDecimoFormRequest $request Los datos de la apuesta y el sorteo
+     *
+     * @return {premioTotal, premiosObtenidos=>[{premio, cantidad}]}
+     *   0: OK
+     * -11: Excepción
+     * -12: Error al leer los resultados
+     * -13: Error al comprobar el décimo
+     */
     public function comprobarDecimo(ComprobarDecimoFormRequest $request)
     {
         $response = [
@@ -374,7 +385,7 @@ class DecimoController extends Controller
                     $response["statusText"] = "ok";
                     $response["data"] = $resultComprobarPremios["data"];
                 }else{
-                    $response["code"] = -12;
+                    $response["code"] = -13;
                     $response["status"] = 400;
                     $response["statusText"] = "ko";
                 }
@@ -398,13 +409,6 @@ class DecimoController extends Controller
                 );
             }
 
-            //Log de salida
-            Log::debug("Saliendo del comprobarDecimo de DecimoController",
-                array(
-                    "request: " => $request->all(),
-                    "response: " => $response
-                )
-            );
         }
         catch(Exception $e){
             $response["code"] = -11;
@@ -418,6 +422,14 @@ class DecimoController extends Controller
                 )
             );
         }
+
+        //Log de salida
+        Log::debug("Saliendo del comprobarDecimo de DecimoController",
+            array(
+                "request: " => $request->all(),
+                "response: " => $response
+            )
+        );
 
         return response()->json(
             $response["data"],

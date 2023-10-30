@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Helpers\Helpers;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -18,6 +19,7 @@ class Sorteo extends Model
     //////////////////////
     ///// RELACIONES /////
     //////////////////////
+
     public function resultado() : HasOne
     {
         return $this->hasOne(Resultado::class, "sorteo", "id");
@@ -207,7 +209,7 @@ class Sorteo extends Model
             //Log de entrada
             Log::debug("Entrando al dameFechasExistentesResultadosBDDadoArrayFechas de Resultado");
 
-            $fechasResultadosExistentes = Sorteo::whereNotNull("resultados")
+            $fechasResultadosExistentes = Sorteo::whereNull("resultados")
                 ->whereIn("fecha", $fechas)
                 ->get("fecha")
                 ->toArray();
@@ -253,10 +255,12 @@ class Sorteo extends Model
             $cadena = "";
 
             foreach($resultadoAux->premios as $premio){
-                $cadena.=$premio["nombre"].";".$premio["numero"].";".$premio["premio"]."\n";
+                $cadena.=Helpers::convertirNombrePremioANombreDeSistema($premio["nombre"]).";".$premio["numero"].";".$premio["premio"]."\n";
             }
 
-            $fechaFormateada = Carbon::createFromFormat("d/m/y", $resultadoAux->fecha)->format("Y-m-d");
+            $aux = explode(" ", $resultadoAux->fecha);
+
+            $fechaFormateada = Carbon::createFromFormat("d/m/y", $aux[count($aux)-1])->format("Y-m-d");
             $sorteo = Sorteo::where("fecha", $fechaFormateada)->firstOrFail();
 
             $sorteo->resultados = $cadena;
