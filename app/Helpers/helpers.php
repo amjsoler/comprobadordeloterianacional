@@ -5,6 +5,7 @@ use App\Http\Controllers\web\ResultadoController;
 use App\Models\Resultado;
 use App\Models\Sorteo;
 use App\Models\User;
+use App\Notifications\NuevasFechasDeSorteoDisponibles;
 use App\Notifications\NuevosResultadosDisponibles;
 use Carbon\Carbon;
 use DOMDocument;
@@ -434,7 +435,8 @@ class Helpers
                     if($result["code"] == 0){
                         $sorteosAInsertar = $result["data"];
 
-                        $result = Sorteo::crearSorteosDadoUnArrayDeSorteos($sorteosAInsertar);
+                        //TODO: La idea es que un futuro esto se haga automático, pero por el momento, simplemente se envía un mail co la info
+                        /*$result = Sorteo::crearSorteosDadoUnArrayDeSorteos($sorteosAInsertar);
 
                         if($result["code"] == 0){
                             $response["code"] = 0;
@@ -446,7 +448,16 @@ class Helpers
                                     "response: " => $response
                                 )
                             );
+                        } */
+
+                        // FIN TODO:
+
+                        if(count($sorteosAInsertar)>0){
+                            $user = User::find(1);
+                            $user->notify(new NuevasFechasDeSorteoDisponibles($sorteosAInsertar));
                         }
+
+                        $response["code"] = 0;
                     }
                     else{
                         //Fallo al sacar los elementos que difieren entre arrays
@@ -993,6 +1004,8 @@ class Helpers
                             $user = User::find(1);
                             $user->notify(new NuevosResultadosDisponibles($arrayResultadosDisponiblesDefinitivo));
                         }
+
+                        $response["code"] = 0;
                     }else{
                         //Fallo al sacar los elementos que difieren entre arrays
                         $response["code"] = -4;

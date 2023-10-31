@@ -2,19 +2,19 @@
 
 namespace App\Notifications;
 
-use App\Helpers\Helpers;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class NuevosResultadosDisponibles extends Notification
+class NuevasFechasDeSorteoDisponibles extends Notification
 {
     use Queueable;
 
     /**
      * Create a new notification instance.
      */
-    public function __construct(public $resultados)
+    public function __construct(public $sorteosDisponibles)
     {
         //
     }
@@ -34,25 +34,17 @@ class NuevosResultadosDisponibles extends Notification
      */
     public function toMail(object $notifiable): MailMessage
     {
-        $responseMail = (new MailMessage)
-            ->subject("Nuevo resultado disponible");
+        $msg =  (new MailMessage)
+                    ->line('Nuevas fechas de sorteo encontradas');
 
-        foreach($this->resultados as $resultado)
-        {
-            $responseMail->line($resultado->fecha);
-
-            $aux = "";
-
-            foreach($resultado->premios as $res)
-            {
-                $aux .= Helpers::convertirNombrePremioANombreDeSistema($res["nombre"]) . ";" . $res["numero"] . ";" . $res["premio"] . "\n";
-            }
-
-            $responseMail->line($aux);
-            $responseMail->line("-----");
+        foreach($this->sorteosDisponibles as $sorteo){
+            $msg->line($sorteo->fecha);
+            $msg->line($sorteo->nombre);
+            $msg->line($sorteo->numero_sorteo);
+            $msg->line("-----");
         }
 
-        return $responseMail;
+        return $msg;
     }
 
     /**

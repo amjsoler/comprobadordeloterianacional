@@ -100,6 +100,11 @@ Route::get("/resultados/{resultado}/eliminar",
 //TODO Esnifar resultados disponibles de varias fuentes
 
 
+Route::get("/esnifeteo-sorteos", function(){
+    Helpers::esnifarYGuardarNuevosSorteos();
+}
+);
+
 
 Route::get("/esnifeteo-resultados", function(){
         Helpers::esnifarYGuardarResultadosDisponibles();
