@@ -20,14 +20,15 @@ return new class extends Migration
             $table->integer("cantidad")->default(1);
 
             $table->unsignedBigInteger("usuario");
-            $table->foreign("usuario")->on("users")->references("id");
+            $table->foreign("usuario")->on("users")->references("id")->restrictOnDelete();
 
             $table->unsignedBigInteger("sorteo");
-            $table->foreign("sorteo")->on("sorteos")->references("id");
+            $table->foreign("sorteo")->on("sorteos")->references("id")->restrictOnDelete();
 
-            $table->decimal("premio")->nullable()->default(null);
+            $table->decimal("premio")->nullable();
 
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

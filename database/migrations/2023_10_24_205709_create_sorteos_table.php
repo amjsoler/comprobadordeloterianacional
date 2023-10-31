@@ -16,8 +16,9 @@ return new class extends Migration
             $table->string("nombre")->nullable();
             $table->date("fecha");
             $table->integer("numero_sorteo")->nullable();
-            $table->text("resultados")->nullable()->default(null);
+            $table->text("resultados")->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

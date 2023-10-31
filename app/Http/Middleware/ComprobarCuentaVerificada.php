@@ -15,8 +15,8 @@ class ComprobarCuentaVerificada
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if(auth()->user()->email_verified_at == null){
-            return response()->json("Verify user account", 418);
+        if(!auth()->check() || auth()->user()->email_verified_at == null){
+            return response()->json("Verify user account", 460);
         }
 
         return $next($request);

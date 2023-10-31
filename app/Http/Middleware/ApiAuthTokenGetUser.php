@@ -2,12 +2,11 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\User;
 use Closure;
-use http\Client\Curl\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -40,11 +39,12 @@ class ApiAuthTokenGetUser
 
                 $userID = DB::table("personal_access_tokens")
                     ->where("token", hash("sha256", $token))
+                    //TODO: ->where("expires_at", ">=", now())
                     ->value("tokenable_id");
 
                 if ($userID > 0) {
                     Log::debug("El token está asociado al user: " . $userID);
-                    $user = \App\Models\User::find($userID);
+                    $user = User::find($userID);
 
                     if ($user) {
                         Log::debug("Guardamos el user en el auth::user()");

@@ -1,6 +1,5 @@
 <?php
 
-use App\Helpers\Helpers;
 use App\Http\Controllers\web\Authentication;
 use App\Http\Controllers\web\ResultadoController;
 use App\Http\Controllers\web\SorteoController;
@@ -95,18 +94,3 @@ Route::put("/resultados/{resultado}/modificar",
 Route::get("/resultados/{resultado}/eliminar",
     [ResultadoController::class, "eliminarResultado"]
 )->name("eliminarresultado");
-
-//TODO Esnifar sorteos disponibles de varias fuentes
-//TODO Esnifar resultados disponibles de varias fuentes
-
-
-Route::get("/esnifeteo-sorteos", function(){
-    Helpers::esnifarYGuardarNuevosSorteos();
-}
-);
-
-
-Route::get("/esnifeteo-resultados", function(){
-        Helpers::esnifarYGuardarResultadosDisponibles();
-    }
-);
