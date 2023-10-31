@@ -4,6 +4,7 @@ use App\Http\Controllers\web\Authentication;
 use App\Http\Controllers\web\ResultadoController;
 use App\Http\Controllers\web\SorteoController;
 use App\Models\Sorteo;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 ///////////////////////////////
@@ -25,6 +26,13 @@ Route::post("recuperar-cuenta",
     [Authentication::class, "recuperarCuentaPost"]
 )->name("recuperarcuentapost");
 
+Route::get("/login", function(){
+    return view("cuentaUsuario.login");
+});
+
+Route::post("/login", function($request){
+    Auth::attempt($request->get("email"), $request->get("password"));
+});
 
 
 ////////////////////////////////
@@ -34,7 +42,8 @@ Route::post("recuperar-cuenta",
 //TODO: Meter un auth:sanctum y un policy can
 Route::get("/sorteos",
     [SorteoController::class, "verSorteos"]
-)->name("versorteos");
+)->middleware(["auth:sanctum", "cuentaVerificada"])
+    ->name("versorteos");
 
 //TODO: Meter un auth:sanctum y un policy can
 Route::post("/sorteos/crear",
@@ -64,33 +73,3 @@ Route::get("/sorteos/{sorteo}/resultados", function(Sorteo $sorteo){
 Route::post("/sorteos/{sorteo}/resultados",
     [SorteoController::class, "guardarResultadosSorteo"]
 )->name("resultadossorteoguardar");
-
-
-///////////////////////////////////
-/////// RUTAS DE RESULTADOS ///////
-///////////////////////////////////
-
-//TODO: Meter un auth:sanctum y un policy can
-Route::get("/resultados",
-    [ResultadoController::class, "verResultados"]
-)->name("verresultados");
-
-//TODO: Meter un auth:sanctum y un policy can
-Route::post("/resultados/crear",
-    [ResultadoController::class, "crearResultado"]
-)->name("crearresultado");
-
-//TODO: Meter un auth:sanctum y un policy can
-Route::get("/resultados/{resultado}/editar",
-    [ResultadoController::class, "editarResultado"]
-)->name("editarresultado");
-
-//TODO: Meter un auth:sanctum y un policy can
-Route::put("/resultados/{resultado}/modificar",
-    [ResultadoController::class, "modificarResultado"]
-)->name("modificarresultado");
-
-//TODO: Meter un auth:sanctum y un policy can
-Route::get("/resultados/{resultado}/eliminar",
-    [ResultadoController::class, "eliminarResultado"]
-)->name("eliminarresultado");
