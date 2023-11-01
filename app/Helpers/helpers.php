@@ -971,7 +971,7 @@ class Helpers
                 }
 
                 //Me traigo las fechas existentes en BD que estén en el array de resultados obtenidos
-                $arrayFechasResultadosExistentesEnBD = Sorteo::dameFechasExistentesResultadosBDDadoArrayFechas($arrayFechasResultadosDisponibles);
+                $arrayFechasResultadosExistentesEnBD = Sorteo::cruzaFechasSorteosExistentesSinResultadosEnBDConArrayFechas($arrayFechasResultadosDisponibles);
 
                 if($arrayFechasResultadosExistentesEnBD["code"] == 0){
                     $arrayFechasResultadosExistentesEnBD = $arrayFechasResultadosExistentesEnBD["data"];

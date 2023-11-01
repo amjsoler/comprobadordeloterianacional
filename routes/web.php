@@ -1,7 +1,6 @@
 <?php
 
 use App\Http\Controllers\web\Authentication;
-use App\Http\Controllers\web\ResultadoController;
 use App\Http\Controllers\web\SorteoController;
 use App\Models\Sorteo;
 use Illuminate\Support\Facades\Auth;

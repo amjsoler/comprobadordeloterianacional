@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use DateTime;
 use Exception;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -35,13 +36,14 @@ class AccountVerifyToken extends Model
      * Método para crear un nuevo token de verificación
      *
      * @param int $userID El usuario al que se asocia el token
+     * @param int $validez La validez del token en formato datetime
      *
      * @return AccountVerifyToken Nuevo token creado para la verificación de la cuenta
      *  0: OK
      * -1: Excepción
      * -2: No se ha podido guardar el nuevo token
      */
-    public static function crearTokenDeVerificacion(int $userID, $validez)
+    public static function crearTokenDeVerificacion(int $userID, DateTime $validez)
     {
         $response = [
             "code" => "",

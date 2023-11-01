@@ -80,14 +80,6 @@ class RecuperarCuentaToken extends Model
                     )
                 );
             }
-
-            //Log de salida
-            Log::debug("Saliendo del crearTokenDeRecuperacionCuenta de RecuperarCuentaToken",
-                array(
-                    "request: " => compact("userID", "validez"),
-                    "response: " => $response
-                )
-            );
         }
         catch(Exception $e){
             $response["code"] = -1;
@@ -99,6 +91,14 @@ class RecuperarCuentaToken extends Model
                 )
             );
         }
+
+        //Log de salida
+        Log::debug("Saliendo del crearTokenDeRecuperacionCuenta de RecuperarCuentaToken",
+            array(
+                "request: " => compact("userID", "validez"),
+                "response: " => $response
+            )
+        );
 
         return $response;
     }

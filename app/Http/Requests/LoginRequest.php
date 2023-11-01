@@ -83,8 +83,8 @@ class LoginRequest extends FormRequest
         return [
             "email" => [
                 "required" => "El email no puede estar vacío",
-                "email" => "El email no es valido",
-                "exists" => "El no existe" //TODO Quitar esto de aquí
+                "email" => "El email no es válido",
+                "exists" => "El email no es válido"
             ],
             "password" => [
                 "required" => "La contraseña no puede estar vacía"

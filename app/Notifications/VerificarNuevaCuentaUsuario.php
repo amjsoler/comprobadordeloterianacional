@@ -37,9 +37,10 @@ class VerificarNuevaCuentaUsuario extends Notification
     public function toMail(object $notifiable): MailMessage
     {
         $url = route("verificarcuentacontoken", $this->token);
+
         return (new MailMessage)
             ->subject("Verifica tu cuenta de usuario")
-            ->line('Primero de todo, ¡bienvenido a '.env("APP_NAME").'!')
+            ->line('Primero de todo, ¡bienvenido a ' . env("APP_NAME") . '!')
             ->line('Este mensaje se ha generado de forma automática para que verifiques tu cuenta de usuario y así poder disfrutar de todas las funcionalidades.')
             ->line('Para hacerlo, solo tienes que pulsar en el enlace que encontrarás a continuación:')
             ->action('Verificar cuenta', $url)

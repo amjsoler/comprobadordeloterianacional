@@ -2,7 +2,6 @@
 
 namespace App\Console;
 
-use App\Jobs\Borrar;
 use App\Jobs\EsnifarResultados;
 use App\Jobs\EsnifarSorteos;
 use Illuminate\Console\Scheduling\Schedule;

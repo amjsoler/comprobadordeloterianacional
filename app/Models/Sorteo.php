@@ -21,11 +21,6 @@ class Sorteo extends Model
     ///// RELACIONES /////
     //////////////////////
 
-    public function resultado() : HasOne
-    {
-        return $this->hasOne(Resultado::class, "sorteo", "id");
-    }
-
 
 
     /////////////////////////////
@@ -57,9 +52,9 @@ class Sorteo extends Model
                 )
             );
 
-            $resultados = Sorteo::find($sorteoID)->resultados;
+            $resultados = Sorteo::find($sorteoID);
 
-            if($resultados){
+            if($resultados && $resultados->resultados){
                 $response["code"] = 0;
                 $response["data"] = $resultados;
             }else{
@@ -91,7 +86,7 @@ class Sorteo extends Model
     /**
      * Método que devuelve un array de fechas que coincidan con las fechas de sorteos pasados por parametro
      *
-     * @param array $fechas Las fechas a buscar
+     * @param array $fechas Las fechas a buscar en formato Y-m-d
      *
      * @return [fecha]
      *  0: OK
@@ -141,65 +136,14 @@ class Sorteo extends Model
     }
 
     /**
-     * Método para crear un conjunto de sorteos dado un array de sorteos
-     *
-     * @param [{nombre, fecha, numero_sorteo}] $sorteosAInsertar Los sorteos a insertar
-     *
-     * @return void
-     *  0: OK
-     * -1: Excepción
-     */
-    public static function crearSorteosDadoUnArrayDeSorteos($sorteosAInsertar)
-    {
-        $response = [];
-
-        Log::debug("Entrando al crearSorteosDadoUnArrayDeSorteos del modelo Sorteo",
-            array(
-                "request: " => compact("sorteosAInsertar")
-            )
-        );
-
-        try{
-            foreach($sorteosAInsertar as $insertar){
-                $sort = new Sorteo();
-                $sort->nombre = $insertar->nombre;
-                $sort->fecha = $insertar->fecha;
-                $sort->numero_sorteo = $insertar->numero_sorteo;
-                $sort->save();
-            }
-
-            $response["code"] = 0;
-        }
-        catch(Exception $e){
-            $response["code"] = -1;
-
-            Log::error($e->getMessage(),
-                array(
-                    "request: " => compact("sorteosAInsertar"),
-                    "response: " => $response
-                )
-            );
-        }
-
-        Log::debug("Saliendo del crearSorteosDadoUnArrayDeSorteos del modelo Sorteo",
-            array(
-                "request: " => compact("sorteosAInsertar"),
-                "response: " => $response
-            )
-        );
-
-        return $response;
-    }
-
-    /**
-     * Devuelve las fechas de resultados existentes en BD
+     * Devuelve las fechas de sorteos existentes sin resutlados en BD y los cruzas con la lista dada por param
      *
      * @return [fechas]
      *  0: OK
      * -1: Excepción
      * -2: Error en la consulta
      */
-    public static function dameFechasExistentesResultadosBDDadoArrayFechas($fechas)
+    public static function cruzaFechasSorteosExistentesSinResultadosEnBDConArrayFechas($fechas)
     {
         $response = [
             "code" => "",
@@ -208,15 +152,15 @@ class Sorteo extends Model
 
         try {
             //Log de entrada
-            Log::debug("Entrando al dameFechasExistentesResultadosBDDadoArrayFechas de Resultado");
+            Log::debug("Entrando al cruzaFechasSorteosExistentesSinResultadosEnBDConArrayFechas de Resultado");
 
-            $fechasResultadosExistentes = Sorteo::whereNull("resultados")
+            $fechasSorteosExistentesSinResultados = Sorteo::whereNull("resultados")
                 ->whereIn("fecha", $fechas)
                 ->get("fecha")
                 ->toArray();
 
             $response["code"] = 0;
-            $response["data"] = $fechasResultadosExistentes;
+            $response["data"] = $fechasSorteosExistentesSinResultados;
 
         } catch (Exception $e) {
             $response["code"] = -1;
@@ -229,62 +173,8 @@ class Sorteo extends Model
         }
 
         //Log de salida
-        Log::debug("Saliendo del dameFechasExistentesResultadosBDDadoArrayFechas de Resultado",
+        Log::debug("Saliendo del cruzaFechasSorteosExistentesSinResultadosEnBDConArrayFechas de Resultado",
             array(
-                "response: " => $response
-            )
-        );
-
-        return $response;
-    }
-
-    public static function insertarNuevoResultadoDadoArrayDeResultados($resultadoAux)
-    {
-        $response = [
-            "code" => "",
-            "data" => ""
-        ];
-
-        try {
-            //Log de entrada
-            Log::debug("Entrando al insertarNuevoResultadoDadoArrayDeResultados de Sorteo",
-                array(
-                    "request: " => $resultadoAux
-                )
-            );
-
-            $cadena = "";
-
-            foreach($resultadoAux->premios as $premio){
-                $cadena.=Helpers::convertirNombrePremioANombreDeSistema($premio["nombre"]).";".$premio["numero"].";".$premio["premio"]."\n";
-            }
-
-            $aux = explode(" ", $resultadoAux->fecha);
-
-            $fechaFormateada = Carbon::createFromFormat("d/m/y", $aux[count($aux)-1])->format("Y-m-d");
-            $sorteo = Sorteo::where("fecha", $fechaFormateada)->firstOrFail();
-
-            $sorteo->resultados = $cadena;
-
-            $sorteo->save();
-
-
-            $response["code"] = 0;
-        } catch (Exception $e) {
-            $response["code"] = -1;
-
-            Log::error($e->getMessage(),
-                array(
-                    "request: " => $resultadoAux,
-                    "response: " => $response
-                )
-            );
-        }
-
-        //Log de salida
-        Log::debug("Saliendo del insertarNuevoResultadoDadoArrayDeResultados de Sorteo",
-            array(
-                "request: " => $resultadoAux,
                 "response: " => $response
             )
         );

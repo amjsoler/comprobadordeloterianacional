@@ -77,7 +77,7 @@ class CrearDecimoFormRequest extends FormRequest
             "reintegro" => "required|numeric",
             "serie" => "numeric",
             "fraccion" => "numeric",
-            "cantidad" => "required|numeric",
+            "cantidad" => "numeric",
             "sorteo" => "required|exists:sorteos,id"
         ];
     }

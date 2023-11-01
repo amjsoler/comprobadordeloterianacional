@@ -158,7 +158,10 @@ class User extends Authenticatable
      * -1: Excepción
      * -2: Error al guardar el usuario
      */
-    public static function crearNuevoUsuario(string $name, string $email, string $password)
+    public static function crearNuevoUsuario(
+        string $name,
+        string $email,
+        string $password)
     {
         $response = [
             "code" => "",
@@ -223,7 +226,8 @@ class User extends Authenticatable
      * @return null
      *  0: OK
      * -1: Excepción
-     * -2: Error al guardar el usuario
+     * -2: El id de usuario no existe
+     * -3: Error al guardar el usuario
      *
      */
     public static function marcarCuentaVerificada(int $userID)
@@ -244,14 +248,19 @@ class User extends Authenticatable
             //Acción
             $result = User::find($userID);
 
-            $result->email_verified_at = now();
+            if($result){
+                $result->email_verified_at = now();
 
-            if($result->save()){
-                $response["code"] = 0;
-            }
-            else{
+                if($result->save()){
+                    $response["code"] = 0;
+                }
+                else{
+                    $response["code"] = -3;
+                }
+            }else{
                 $response["code"] = -2;
             }
+
 
             //Log de salida
             Log::debug("Saliendo del marcarCuentaVerificada de User",
@@ -275,7 +284,21 @@ class User extends Authenticatable
         return $response;
     }
 
-    public static function guardarNuevoPass($usuarioID, $password)
+    /**
+     * Método para modificar la contraseña de un usuario
+     *
+     * @param int $usuarioID El identificador de usuario
+     * @param string $password La nueva contraseña
+     *
+     * @return void
+     *  0: OK
+     * -1: Excepción
+     * -2: No se ha encontrado el id de usuario
+     * -3: No se ha podido guardar los datos
+     */
+    public static function guardarNuevoPass(
+        int $usuarioID,
+        string $password)
     {
         $response = [
             "code" => "",
@@ -293,22 +316,20 @@ class User extends Authenticatable
             //Acción
             $result = User::find($usuarioID);
 
-            $result->password = Hash::make($password);
+            if($result){
+                $result->password = $password;
 
-            if($result->save()){
-                $response["code"] = 0;
-            }
-            else{
+                if($result->save()){
+                    $response["code"] = 0;
+                }
+                else{
+                    $response["code"] = -3;
+                }
+            }else{
                 $response["code"] = -2;
             }
 
-            //Log de salida
-            Log::debug("Saliendo del guardarNuevoPass de User",
-                array(
-                    "request: " => compact("usuarioID", "password"),
-                    "response: " => $response
-                )
-            );
+
         }
         catch(Exception $e){
             $response["code"] = -1;
@@ -320,6 +341,14 @@ class User extends Authenticatable
                 )
             );
         }
+
+        //Log de salida
+        Log::debug("Saliendo del guardarNuevoPass de User",
+            array(
+                "request: " => compact("usuarioID", "password"),
+                "response: " => $response
+            )
+        );
 
         return $response;
     }

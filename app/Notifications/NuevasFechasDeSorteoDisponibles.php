@@ -11,9 +11,6 @@ class NuevasFechasDeSorteoDisponibles extends Notification
 {
     use Queueable;
 
-    /**
-     * Create a new notification instance.
-     */
     public function __construct(public $sorteosDisponibles)
     {
         //
@@ -34,10 +31,10 @@ class NuevasFechasDeSorteoDisponibles extends Notification
      */
     public function toMail(object $notifiable): MailMessage
     {
-        $msg =  (new MailMessage)
-                    ->line('Nuevas fechas de sorteo encontradas');
+        $msg = (new MailMessage)
+            ->line('Nuevas fechas de sorteo encontradas');
 
-        foreach($this->sorteosDisponibles as $sorteo){
+        foreach ($this->sorteosDisponibles as $sorteo) {
             $msg->line($sorteo->fecha);
             $msg->line($sorteo->nombre);
             $msg->line($sorteo->numero_sorteo);

@@ -89,9 +89,9 @@ class Decimo extends Model
      * @param int $usuario El usuario creador
      * @param string $numero El número del décimo
      * @param int $reintegro El reintegro
-     * @param int $serie La serie
-     * @param int $fraccion La fracción
-     * @param int $cantidad La cantidad de décimos
+     * @param int|null $serie La serie
+     * @param int|null $fraccion La fracción
+     * @param int|null $cantidad La cantidad de décimos
      * @param int $sorteo El id del sorteo al que pertenece
      *
      * @return Decimo El décimo recién creado
@@ -104,9 +104,9 @@ class Decimo extends Model
         int $usuario,
         string $numero,
         int $reintegro,
-        int $serie,
-        int $fraccion,
-        int $cantidad,
+        int|null $serie,
+        int|null $fraccion,
+        int|null $cantidad,
         int $sorteo
     )
     {
@@ -136,9 +136,19 @@ class Decimo extends Model
             $nuevoDecimo->usuario = $usuario;
             $nuevoDecimo->numero = $numero;
             $nuevoDecimo->reintegro = $reintegro;
-            $nuevoDecimo->serie = $serie;
-            $nuevoDecimo->fraccion = $fraccion;
-            $nuevoDecimo->cantidad = $cantidad;
+
+            if($serie){
+                $nuevoDecimo->serie = $serie;
+            }
+
+            if($fraccion){
+                $nuevoDecimo->fraccion = $fraccion;
+            }
+
+            if($cantidad){
+                $nuevoDecimo->cantidad = $cantidad;
+            }
+
             $nuevoDecimo->sorteo = $sorteo;
 
             if($nuevoDecimo->save()){
@@ -193,9 +203,9 @@ class Decimo extends Model
      * @param Decimo $decimo El décimo a modificar
      * @param string $numero El nuevo número
      * @param int $reintegro El nuevo reintegro
-     * @param int $serie La nueva serie
-     * @param int $fraccion La nueva fracción
-     * @param int $cantidad La nueva cantidad
+     * @param int|null $serie La nueva serie
+     * @param int|null $fraccion La nueva fracción
+     * @param int|null $cantidad La nueva cantidad
      * @param int $sorteo El numero sorteo
      *
      * @return Decimo El décimo modificado
@@ -207,9 +217,9 @@ class Decimo extends Model
         Decimo $decimo,
         string $numero,
         int $reintegro,
-        int $serie,
-        int $fraccion,
-        int $cantidad,
+        int|null $serie,
+        int|null $fraccion,
+        int|null $cantidad,
         int $sorteo
     )
     {
@@ -236,9 +246,19 @@ class Decimo extends Model
 
             $decimo->numero = $numero;
             $decimo->reintegro = $reintegro;
-            $decimo->serie = $serie;
-            $decimo->fraccion = $fraccion;
-            $decimo->cantidad = $cantidad;
+
+            if($serie){
+                $decimo->serie = $serie;
+            }
+
+            if($fraccion){
+                $decimo->fraccion = $fraccion;
+            }
+
+            if($cantidad){
+                $decimo->cantidad = $cantidad;
+            }
+
             $decimo->sorteo = $sorteo;
 
             if($decimo->save()){
