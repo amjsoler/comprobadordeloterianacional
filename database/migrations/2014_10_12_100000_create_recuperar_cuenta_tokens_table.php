@@ -20,7 +20,6 @@ return new class extends Migration
             $table->string("token");
             $table->timestamp("valido_hasta");
             $table->timestamps();
-            $table->softDeletes();
         });
     }
 

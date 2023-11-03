@@ -43,4 +43,17 @@ class RegisterTest extends TestCase
 
         $response->assertInvalid(["email", "password"]);
     }
+
+    public function test_register_ok()
+    {
+        $response = $this->post("/api/registrarse",
+        array(
+            "name" => "test",
+            "email" => "test@test.com",
+            "password" => "12345",
+            "password_confirmation" => "12345"
+        ));
+
+        $response->assertStatus(200);
+    }
 }

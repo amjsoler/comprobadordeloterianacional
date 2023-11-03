@@ -3,6 +3,7 @@
 use App\Http\Controllers\web\Authentication;
 use App\Http\Controllers\web\SorteoController;
 use App\Models\Sorteo;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -11,10 +12,7 @@ use Illuminate\Support\Facades\Route;
 ///////////////////////////////
 
 Route::get("verificar-cuenta/{token}",
-    [
-        Authentication::class,
-        "verificarCuentaConToken"
-    ]
+    [Authentication::class, "verificarCuentaConToken"]
 )->name("verificarcuentacontoken");
 
 Route::get("recuperar-cuenta/{token}",
@@ -27,48 +25,61 @@ Route::post("recuperar-cuenta",
 
 Route::get("/login", function(){
     return view("cuentaUsuario.login");
-});
+})->middleware(["guest"])
+    ->name("login");
 
-Route::post("/login", function($request){
-    Auth::attempt($request->get("email"), $request->get("password"));
-});
+Route::post("/login", function(Request $request){
+    if(Auth::attempt(array("email" => $request->get("email"), "password" => $request->get("password")))){
+        return redirect(route("versorteos"));
+    }else{
+        return redirect()->back();
+    }
+})->middleware(["guest"]);
 
 
 ////////////////////////////////
 /////// RUTAS DE SORTEOS ///////
 ////////////////////////////////
 
-//TODO: Meter un auth:sanctum y un policy can
 Route::get("/sorteos",
     [SorteoController::class, "verSorteos"]
 )->middleware(["auth:sanctum", "cuentaVerificada"])
+    ->can("delete", Sorteo::class)
     ->name("versorteos");
 
-//TODO: Meter un auth:sanctum y un policy can
 Route::post("/sorteos/crear",
     [SorteoController::class, "crearSorteo"]
-)->name("crearsorteo");
+)->middleware(["auth:sanctum", "cuentaVerificada"])
+    ->can("delete", Sorteo::class)
+    ->name("crearsorteo");
 
-//TODO: Meter un auth:sanctum y un policy can
 Route::get("/sorteos/{sorteo}/editar",
     [SorteoController::class, "editarSorteo"]
-)->name("editarsorteo");
+)->middleware(["auth:sanctum", "cuentaVerificada"])
+    ->can("delete", Sorteo::class)
+    ->name("editarsorteo");
 
-//TODO: Meter un auth:sanctum y un policy can
 Route::put("/sorteos/{sorteo}/modificar",
     [SorteoController::class, "modificarSorteo"]
-)->name("modificarsorteo");
+)->middleware(["auth:sanctum", "cuentaVerificada"])
+    ->can("delete", Sorteo::class)
+    ->name("modificarsorteo");
 
-//TODO: Meter un auth:sanctum y un policy can
 Route::get("/sorteos/{sorteo}/eliminar",
     [SorteoController::class, "eliminarSorteo"]
-)->name("eliminarsorteo");
+)->middleware(["auth:sanctum", "cuentaVerificada"])
+    ->can("delete", Sorteo::class)
+    ->name("eliminarsorteo");
 
 Route::get("/sorteos/{sorteo}/resultados", function(Sorteo $sorteo){
     return view("sorteos.verGuardarResultadosSorteo", compact("sorteo"));
 }
-)->name("resultadossorteover");
+)->middleware(["auth:sanctum", "cuentaVerificada"])
+    ->can("delete", Sorteo::class)
+    ->name("resultadossorteover");
 
 Route::post("/sorteos/{sorteo}/resultados",
     [SorteoController::class, "guardarResultadosSorteo"]
-)->name("resultadossorteoguardar");
+)->middleware(["auth:sanctum", "cuentaVerificada"])
+    ->can("delete", Sorteo::class)
+    ->name("resultadossorteoguardar");

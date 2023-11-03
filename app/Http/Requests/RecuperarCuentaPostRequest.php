@@ -74,6 +74,7 @@ class RecuperarCuentaPostRequest extends FormRequest
     {
         return [
             "password" => "required|confirmed",
+            "token" => "required"
         ];
     }
 

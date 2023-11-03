@@ -215,6 +215,16 @@ class ApiAuthentication extends Controller
         );
     }
 
+    /**
+     * Método para inciar el proceso de recuperación de cuenta. Recibe un email y manda un correo a dicho email para cambiar la contraseña
+     *
+     * @param Request $request Incluye el email para mandar el correo
+     *
+     * @return \Illuminate\Http\JsonResponse void
+     *   0: OK
+     * -11: Excepción
+     * -12: Fallo al crear el token de recuperación
+     */
     public function recuperarCuenta(Request $request)
     {
         $response = [

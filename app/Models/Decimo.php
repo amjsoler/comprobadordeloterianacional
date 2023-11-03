@@ -59,7 +59,7 @@ class Decimo extends Model
 
             //Acción
             $response["code"] = 0;
-            $response["data"] = $user->decimos;;
+            $response["data"] = $user->decimos;
 
             //Log de salida
             Log::debug("Saliendo del dameMisDecimos de Decimo",

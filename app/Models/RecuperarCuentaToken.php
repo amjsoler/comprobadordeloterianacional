@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Log;
 
 class RecuperarCuentaToken extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory;
 
     protected $table = "recuperar_cuenta_tokens";
 

@@ -361,7 +361,7 @@ class Helpers
         return false;
     }
 
-    public static function interpretarCadenaResultados($resultados)
+    private static function interpretarCadenaResultados($resultados)
     {
         $coleccionResultados = collect();
 
@@ -516,7 +516,7 @@ class Helpers
      * -1: Excepción
      * -2: La clave no está puesta en la confiuración
      */
-    public static function dameURLSParaEsnifarSorteos()
+    private static function dameURLSParaEsnifarSorteos()
     {
         $response = [];
 
@@ -568,7 +568,7 @@ class Helpers
      * -1: Excepción
      * -2: No está puesta la propiedad en el env
      */
-    public static function dameURLSParaEsnifarResultados()
+    private static function dameURLSParaEsnifarResultados()
     {
         $response = [];
 
@@ -1053,6 +1053,13 @@ class Helpers
         return $response;
     }
 
+    /**
+     * Método que convierte la cadena que viene de cervantes a una cadena interna de sistema
+     *
+     * @param string $nombre nombre del premio
+     *
+     * @return string El nombre del premio traducido
+     */
     public static function convertirNombrePremioANombreDeSistema(string $nombre)
     {
         switch($nombre)
@@ -1085,6 +1092,8 @@ class Helpers
                 return "1terminacionprimero";
             case "Reintegros":
                 return "reintegros";
+            default:
+                return "";
         }
     }
 }

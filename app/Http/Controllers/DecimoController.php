@@ -9,7 +9,6 @@ use App\Http\Requests\ModificarDecimoFormRequest;
 use App\Models\Decimo;
 use App\Models\Sorteo;
 use Exception;
-use Faker\Extension\Helper;
 use Illuminate\Support\Facades\Log;
 
 class DecimoController extends Controller
@@ -63,15 +62,6 @@ class DecimoController extends Controller
                     )
                 );
             }
-
-            //Log de salida
-            Log::debug("Saliendo del verMisDecimos de DecimoController",
-                array
-                (
-                    "usuarioID: " => auth()->user()->id,
-                    "response: " => $response
-                )
-            );
         }
         catch(Exception $e){
             $response["code"] = -11;
@@ -82,10 +72,19 @@ class DecimoController extends Controller
                 array
                 (
                     "usuarioID: " => auth()->user()->id,
-                    "repsonse: " => $response
+                    "response: " => $response
                 )
             );
         }
+
+        //Log de salida
+        Log::debug("Saliendo del verMisDecimos de DecimoController",
+            array
+            (
+                "usuarioID: " => auth()->user()->id,
+                "response: " => $response
+            )
+        );
 
         return response()->json(
             $response["data"],

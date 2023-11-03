@@ -9,42 +9,42 @@ use Illuminate\Support\Facades\Route;
 //////////////////////////////////////
 
 Route::post("/iniciar-sesion",
-    [ApiAuthentication::class, "login"]);
+    [ApiAuthentication::class, "login"]
+)->middleware("guest");
 
 Route::post("/registrarse",
-    [ApiAuthentication::class, "register"]);
+    [ApiAuthentication::class, "register"]
+)->middleware("guest");
 
 Route::post("/recuperar-cuenta",
-    [
-        ApiAuthentication::class, "recuperarCuenta"
-    ]
+    [ApiAuthentication::class, "recuperarCuenta"]
 );
 
-
+Route::get("/verificar-cuenta",
+    [ApiAuthentication::class, "mandarCorreoVerificacionCuenta"]
+)->middleware("auth:sanctum");
 
 ////////////////////////////////
 /////// RUTAS DE DÉCIMOS ///////
 ////////////////////////////////
 
-//TODO: Falta el auth:sanctum
 Route::get("/mis-decimos",
     [DecimoController::class, "verMisDecimos"]
-);
+)->middleware(["auth:sanctum", "cuentaVerificada"]);
 
-//TODO: Falta el auth:sanctum
 Route::post("/mis-decimos",
     [DecimoController::class, "crearDecimo"]
-);
+)->middleware(["auth:sanctum", "cuentaVerificada"]);
 
-//TODO: Falta el auth:sanctum y el can policy
 Route::put("/mis-decimos/{decimo}",
     [DecimoController::class, "modificarDecimo"]
-);
+)->middleware(["auth:sanctum", "cuentaVerificada"])
+    ->can("update", "decimo");
 
-//TODO: Falta el auth:sanctum y el can policy
 Route::delete("/mis-decimos/{decimo}",
     [DecimoController::class, "eliminarDecimo"]
-);
+)->middleware(["auth:sanctum", "cuentaVerificada"])
+    ->can("delete", "decimo");
 
 
 

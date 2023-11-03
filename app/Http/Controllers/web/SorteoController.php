@@ -2,15 +2,9 @@
 
 namespace App\Http\Controllers\web;
 
-use App\Helpers\Helpers;
 use App\Http\Controllers\Controller;
 use App\Models\Sorteo;
-use Carbon\Carbon;
-use DOMDocument;
 use Illuminate\Http\Request;
-use Illuminate\Support\Arr;
-use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Http;
 
 class SorteoController extends Controller
 {

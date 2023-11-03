@@ -3,11 +3,14 @@
 namespace Tests\Feature\Sorteos;
 
 use App\Models\Sorteo;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Testing\Fluent\AssertableJson;
 use Tests\TestCase;
 
 class SorteoModelTest extends TestCase
 {
+    use RefreshDatabase;
+
     public function test_dame_resultados_dado_el_sorteo(): void
     {
         //Sorteo que no existe
