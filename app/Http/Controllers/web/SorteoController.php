@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\web;
 
+use App\Events\NuevosResultadosGuardados;
 use App\Http\Controllers\Controller;
 use App\Models\Sorteo;
 use Illuminate\Http\Request;
@@ -55,6 +56,9 @@ class SorteoController extends Controller
 
         $sorteo->resultados = $resultados;
         $sorteo->save();
+
+        //Lanzo evento de guardar resultados
+        NuevosResultadosGuardados::dispatch($sorteo);
 
         return redirect(route("versorteos"));
     }

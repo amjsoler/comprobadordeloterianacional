@@ -105,4 +105,57 @@ class DecimoModelTest extends TestCase
         $this->assertEquals(1, Decimo::onlyTrashed()->count());
         $this->assertDatabaseCount("decimos", 1);
     }
+
+    public function test_dame_decimos_sin_comprobar_dado_el_sorteo_with_user()
+    {
+        $this->refreshDatabase();
+
+        $userRand = User::factory()->create();
+        $sorteoRand = Sorteo::factory()->create();
+        $decimoRand1 = Decimo::factory()->create(["usuario" => $userRand->id, "sorteo" => $sorteoRand->id]);
+        $decimoRand2 = Decimo::factory()->create(["usuario" => $userRand->id, "sorteo" => $sorteoRand->id]);
+        $decimoRand3 = Decimo::factory()->create(["usuario" => $userRand->id, "sorteo" => $sorteoRand->id]);
+
+        $decimos = Decimo::dameDecimosSinComprobarDadoElSorteoWithUser($sorteoRand)["data"];
+        $this->assertEquals(3, count($decimos));
+
+        $decimoRand1->premio = 15;
+        $decimoRand1->save();
+
+        $decimos = Decimo::dameDecimosSinComprobarDadoElSorteoWithUser($sorteoRand)["data"];
+        $this->assertEquals(2, count($decimos));
+
+        $decimoRand2->premio = 15;
+        $decimoRand2->save();
+        $decimoRand3->premio = 15;
+        $decimoRand3->save();
+
+        $decimos = Decimo::dameDecimosSinComprobarDadoElSorteoWithUser($sorteoRand)["data"];
+        $this->assertEquals(0, count($decimos));
+    }
+
+    public function test_asignar_premio()
+    {
+        $this->refreshDatabase();
+
+        $userRand = User::factory()->create();
+        $sorteoRand = Sorteo::factory()->create();
+        $decimoRand1 = Decimo::factory()->create(["usuario" => $userRand->id, "sorteo" => $sorteoRand->id]);
+        $decimoRand2 = Decimo::factory()->create(["usuario" => $userRand->id, "sorteo" => $sorteoRand->id]);
+        $decimoRand3 = Decimo::factory()->create(["usuario" => $userRand->id, "sorteo" => $sorteoRand->id]);
+
+        $this->assertNull($decimoRand1->premio);
+
+        $decimoRand1->premio = "15";
+        $decimoRand1->save();
+        $this->assertEquals(15, $decimoRand1->premio);
+
+        $decimoRand2->premio = 100;
+        $decimoRand2->save();
+        $this->assertEquals("100", $decimoRand2->premio);
+
+        $decimoRand3->premio = "1500";
+        $decimoRand3->save();
+        $this->assertEquals("1500", $decimoRand3->premio);
+    }
 }

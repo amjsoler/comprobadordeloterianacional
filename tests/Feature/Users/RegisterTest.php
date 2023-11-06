@@ -46,10 +46,12 @@ class RegisterTest extends TestCase
 
     public function test_register_ok()
     {
+        $this->refreshDatabase();
+
         $response = $this->post("/api/registrarse",
         array(
             "name" => "test",
-            "email" => "test@test.com",
+            "email" => "test2@test.com",
             "password" => "12345",
             "password_confirmation" => "12345"
         ));

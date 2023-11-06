@@ -56,100 +56,114 @@ class Helpers
                     switch($resultado->nombre){
                         case "especial":
                             if(self::comprobarEspecial($resultado->numero, $numeroApostado, $serie, $fraccion)){
-                                $premioTotal += $resultado->premio;
-                                $premiosObtenidos->push((object)["Especial" => $resultado->premio]);
-                                $premioEncontrado = true;
+                                if($resultado->premio > $premioTotal){
+                                    $premioTotal = $resultado->premio;
+                                    $premiosObtenidos = collect((object)["Especial" => $resultado->premio]);
+                                }
                             }
                             break;
                         case "primero":
                             if(self::comprobarPrimero($resultado->numero, $numeroApostado)){
-                                $premioTotal += $resultado->premio;
-                                $premiosObtenidos->push((object)["Primer premio" => $resultado->premio]);
-                                $premioEncontrado = true;
+                                if($resultado->premio > $premioTotal){
+                                    $premioTotal = $resultado->premio;
+                                    $premiosObtenidos = collect((object)["Primer premio" => $resultado->premio]);
+                                }
                             }
                             break;
                         case "segundo":
                             if(self::comprobarSegundo($resultado->numero, $numeroApostado)){
-                                $premioTotal += $resultado->premio;
-                                $premiosObtenidos->push((object)["Segundo premio" => $resultado->premio]);
-                                $premioEncontrado = true;
+                                if($resultado->premio > $premioTotal){
+                                    $premioTotal = $resultado->premio;
+                                    $premiosObtenidos = collect((object)["Segundo premio" => $resultado->premio]);
+                                }
                             }
                             break;
                         case "4cifras":
                             if(self::comprobar4cifras($resultado->numero, $numeroApostado)){
-                                $premioTotal += $resultado->premio;
-                                $premiosObtenidos->push((object)["Acierto de 4 cifras" => $resultado->premio]);
-                                $premioEncontrado = true;
+                                if($resultado->premio > $premioTotal){
+                                    $premioTotal = $resultado->premio;
+                                    $premiosObtenidos = collect((object)["Acierto de 4 cifras" => $resultado->premio]);
+                                }
                             }
                             break;
                         case "3cifras":
                             if(self::comprobar3cifras($resultado->numero, $numeroApostado)){
-                                $premioTotal += $resultado->premio;
-                                $premiosObtenidos->push((object)["Acierto de 3 cifras" => $resultado->premio]);
-                                $premioEncontrado = true;
+                                if($resultado->premio > $premioTotal){
+                                    $premioTotal = $resultado->premio;
+                                    $premiosObtenidos = collect((object)["Acierto de 3 cifras" => $resultado->premio]);
+                                }
                             }
                             break;
                         case "2cifras":
                             if(self::comprobar2cifras($resultado->numero, $numeroApostado)){
-                                $premioTotal += $resultado->premio;
-                                $premiosObtenidos->push((object)["Acierto de 2 cifras" => $resultado->premio]);
-                                $premioEncontrado = true;
+                                if($resultado->premio > $premioTotal){
+                                    $premioTotal = $resultado->premio;
+                                    $premiosObtenidos = collect((object)["Acierto de 2 cifras" => $resultado->premio]);
+                                }
                             }
                             break;
                         case "aproximacionesprimero":
                             if(self::comprobarAproximacionesPrimero($resultado->numero, $numeroApostado)){
-                                $premioTotal += $resultado->premio;
-                                $premiosObtenidos->push((object)["Aproximación al primer premio" => $resultado->premio]);
-                                $premioEncontrado = true;
+                                if($resultado->premio > $premioTotal){
+                                    $premioTotal = $resultado->premio;
+                                    $premiosObtenidos = collect((object)["Aproximación al primer premio" => $resultado->premio]);
+                                }
                             }
                             break;
                         case "aproximacionessegundo":
                             if(self::comprobarAproximacionesSegundo($resultado->numero, $numeroApostado)){
-                                $premioTotal += $resultado->premio;
-                                $premiosObtenidos->push((object)["Aproximación al segundo premio" => $resultado->premio]);
-                                $premioEncontrado = true;
+                                if($resultado->premio > $premioTotal){
+                                    $premioTotal = $resultado->premio;
+                                    $premiosObtenidos = collect((object)["Aproximación al segundo premio" => $resultado->premio]);
+                                }
                             }
                             break;
                         case "centenaprimero":
                             if(self::comprobarCentenaPrimero($resultado->numero, $numeroApostado)){
-                                $premioTotal += $resultado->premio;
-                                $premiosObtenidos->push((object)["Centena del primer premio" => $resultado->premio]);
-                                $premioEncontrado = true;
+                                if($resultado->premio > $premioTotal){
+                                    $premioTotal = $resultado->premio;
+                                    $premiosObtenidos = collect((object)["Centena del primer premio" => $resultado->premio]);
+                                }
                             }
                             break;
                         case "centenasegundo":
                             if(self::comprobarCentenaSegundo($resultado->numero, $numeroApostado)){
-                                $premioTotal += $resultado->premio;
-                                $premiosObtenidos->push((object)["Centena del segundo premio" => $resultado->premio]);
-                                $premioEncontrado = true;
+                                if($resultado->premio > $premioTotal){
+                                    $premioTotal = $resultado->premio;
+                                    $premiosObtenidos = collect((object)["Centena del segundo premio" => $resultado->premio]);
+                                }
                             }
                             break;
                         case "3terminacionesprimero":
                             if(self::comprobar3terminacionesPrimero($resultado->numero, $numeroApostado)){
-                                $premioTotal += $resultado->premio;
-                                $premiosObtenidos->push((object)["Terminación de 3 cifras" => $resultado->premio]);
-                                $premioEncontrado = true;
+                                if($resultado->premio > $premioTotal){
+                                    $premioTotal = $resultado->premio;
+                                    $premiosObtenidos = collect((object)["Terminación de 3 cifras" => $resultado->premio]);
+                                }
                             }
                             break;
                         case "2terminacionesprimero":
                             if(self::comprobar2terminacionesPrimero($resultado->numero, $numeroApostado)){
-                                $premioTotal += $resultado->premio;
-                                $premiosObtenidos->push((object)["Terminación de 2 cifras" => $resultado->premio]);
-                                $premioEncontrado = true;
+                                if($resultado->premio > $premioTotal){
+                                    $premioTotal = $resultado->premio;
+                                    $premiosObtenidos = collect((object)["Terminación de 2 cifras" => $resultado->premio]);
+                                }
                             }
                             break;
                         case "1terminacionprimero":
                             if(self::comprobar1terminacionPrimero($resultado->numero, $numeroApostado)){
-                                $premioTotal += $resultado->premio;
-                                $premiosObtenidos->push((object)["Terminación de 1 cifra" => $resultado->premio]);
-                                $premioEncontrado = true;
+                                if($resultado->premio > $premioTotal){
+                                    $premioTotal = $resultado->premio;
+                                    $premiosObtenidos = collect((object)["Terminación de 1 cifra" => $resultado->premio]);
+                                }
                             }
                             break;
                         case "reintegros":
                             if(self::comprobarReintegros($resultado->numero, $reintegro)){
-                                $premioTotal += $resultado->premio;
-                                $premiosObtenidos->push((object)["Reintegro" => $resultado->premio]);
-                                $premioEncontrado = true;
+                                if($resultado->premio > $premioTotal){
+                                    $premioTotal = $resultado->premio;
+                                    $premiosObtenidos = collect((object)["Reintegro" => $resultado->premio]);
+                                }
                             }
                             break;
                     }

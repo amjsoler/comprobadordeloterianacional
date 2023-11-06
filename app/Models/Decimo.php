@@ -24,7 +24,7 @@ class Decimo extends Model
      *
      * @return BelongsTo
      */
-    public function usuario() : BelongsTo
+    public function usuarioPropietario() : BelongsTo
     {
         return $this->belongsTo(User::class, "usuario", "id");
     }
@@ -336,13 +336,6 @@ class Decimo extends Model
                 $response["code"] = -2;
             }
 
-            //Log de salida
-            Log::debug("Saliendo del eliminarDecimo de Decimo",
-                array(
-                    "request: " => compact("decimo"),
-                    "response: " => $response
-                )
-            );
         }
         catch(Exception $e){
             $response["code"] = -1;
@@ -354,6 +347,126 @@ class Decimo extends Model
                 )
             );
         }
+
+        //Log de salida
+        Log::debug("Saliendo del eliminarDecimo de Decimo",
+            array(
+                "request: " => compact("decimo"),
+                "response: " => $response
+            )
+        );
+
+        return $response;
+    }
+
+    /**
+     * Método que devuelve los décimos que no se hayan comprobado todavía para el sorteo facilitado
+     *
+     * @param Sorteo $sorteo Sorteo sobre el que buscar décimos
+     *
+     * @return Decimo[] Los décimos del sorteo sin comprobar
+     *
+     *  0: ok
+     * -1: Excepción
+     */
+    public static function dameDecimosSinComprobarDadoElSorteoWithUser(Sorteo $sorteo)
+    {
+        $response = [
+            "code" => "",
+            "data" => ""
+        ];
+
+        try{
+            //Log de entrada
+            Log::debug("Entrando al dameDecimosSinComprobarDadoElSorteo de Decimo",
+                array(
+                    "request: " => $sorteo
+                )
+            );
+
+            $decimos = Decimo::with("usuarioPropietario")
+                ->where("premio" , null)
+                ->where("sorteo", $sorteo->id)
+                ->get();
+
+            $response["code"] = 0;
+            $response["data"] = $decimos;
+        }
+        catch(Exception $e){
+            $response["code"] = -1;
+
+            Log::error($e->getMessage(),
+                array(
+                    "request: " => $sorteo,
+                    "response: " => $response
+                )
+            );
+        }
+
+        //Log de salida
+        Log::debug("Saliendo del dameDecimosSinComprobarDadoElSorteo de Decimo",
+            array(
+                "request: " => $sorteo,
+                "response: " => $response
+            )
+        );
+
+        return $response;
+    }
+
+    /**
+     * Método que asigna el premio pasado por param al décimo también pasado
+     *
+     * @param Decimo $decimo Décimo al que asignar el premio
+     * @param string $premioTotal Premio a asignar
+     *
+     * @return void
+     *  0: ok
+     * -1: Excepción
+     * -2: Error al guardar el premio
+     */
+    public static function asignarPremio(Decimo $decimo, string $premioTotal)
+    {
+        $response = [
+            "code" => "",
+            "data" => ""
+        ];
+
+        try{
+            //Log de entrada
+            Log::debug("Entrando al asignarPremio de Decimo",
+                array(
+                    "request: " => compact("decimo", "premioTotal")
+                )
+            );
+
+            $decimo->premio = $premioTotal;
+
+            if($decimo->save()){
+                $response["code"] = 0;
+            }else{
+                $response["code"] = -2;
+            }
+
+        }
+        catch(Exception $e){
+            $response["code"] = -1;
+
+            Log::error($e->getMessage(),
+                array(
+                    "request: " => compact("decimo", "premioTotal"),
+                    "response: " => $response
+                )
+            );
+        }
+
+        //Log de salida
+        Log::debug("Saliendo del asignarPremio de Decimo",
+            array(
+                "request: " => compact("decimo", "premioTotal"),
+                "response: " => $response
+            )
+        );
 
         return $response;
     }
