@@ -29,6 +29,11 @@ class Decimo extends Model
         return $this->belongsTo(User::class, "usuario", "id");
     }
 
+    public function sorteoPerteneciente() : BelongsTo
+    {
+        return $this->belongsTo(Sorteo::class, "sorteo", "id");
+    }
+
     /////////////////////////////
     ///// MÉTODOS ESTÁTICOS /////
     /////////////////////////////
@@ -59,7 +64,7 @@ class Decimo extends Model
 
             //Acción
             $response["code"] = 0;
-            $response["data"] = $user->decimos;
+            $response["data"] = $user->decimos()->with("sorteoPerteneciente")->get();
 
             //Log de salida
             Log::debug("Saliendo del dameMisDecimos de Decimo",
