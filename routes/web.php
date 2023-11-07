@@ -3,6 +3,8 @@
 use App\Http\Controllers\web\Authentication;
 use App\Http\Controllers\web\SorteoController;
 use App\Models\Sorteo;
+use App\Models\User;
+use App\Notifications\PruebaBorrar;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -83,3 +85,8 @@ Route::post("/sorteos/{sorteo}/resultados",
 )->middleware(["auth:sanctum", "cuentaVerificada"])
     ->can("delete", Sorteo::class)
     ->name("resultadossorteoguardar");
+
+Route::get("prueba-correo", function(){
+    User::where("email", "amjsoler@gmail.com")->first()->notify(new PruebaBorrar());
+})->middleware("auth:sanctum", "cuentaVerificada")
+->can("delete", Sorteo::class);
