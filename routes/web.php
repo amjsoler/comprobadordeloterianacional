@@ -5,6 +5,7 @@ use App\Http\Controllers\web\SorteoController;
 use App\Models\Sorteo;
 use App\Models\User;
 use App\Notifications\PruebaBorrar;
+use App\Notifications\PruebaQueuedBorrar;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -90,3 +91,9 @@ Route::get("prueba-correo", function(){
     User::where("email", "amjsoler@gmail.com")->first()->notify(new PruebaBorrar());
 })->middleware("auth:sanctum", "cuentaVerificada")
 ->can("delete", Sorteo::class);
+
+Route::get("prueba-queued-correo", function(){
+    User::where("email", "amjsoler@gmail.com")->first()->notify(new PruebaQueuedBorrar());
+})->middleware("auth:sanctum", "cuentaVerificada")
+    ->can("delete", Sorteo::class);
+
