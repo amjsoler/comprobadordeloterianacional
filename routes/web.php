@@ -87,6 +87,8 @@ Route::post("/sorteos/{sorteo}/resultados",
     ->can("delete", Sorteo::class)
     ->name("resultadossorteoguardar");
 
+//Rutas de prueba
+
 Route::get("prueba-correo", function(){
     User::where("email", "amjsoler@gmail.com")->first()->notify(new PruebaBorrar());
 })->middleware("auth:sanctum", "cuentaVerificada")
@@ -94,6 +96,16 @@ Route::get("prueba-correo", function(){
 
 Route::get("prueba-queued-correo", function(){
     User::where("email", "amjsoler@gmail.com")->first()->notify(new PruebaQueuedBorrar());
+})->middleware("auth:sanctum", "cuentaVerificada")
+    ->can("delete", Sorteo::class);
+
+Route::get("esnifar-sorteos", function(){
+    (new \App\Jobs\EsnifarSorteos())->handle();
+})->middleware("auth:sanctum", "cuentaVerificada")
+    ->can("delete", Sorteo::class);
+
+Route::get("esnifar-resultados", function(){
+    (new \App\Jobs\EsnifarResultados())->handle();
 })->middleware("auth:sanctum", "cuentaVerificada")
     ->can("delete", Sorteo::class);
 
