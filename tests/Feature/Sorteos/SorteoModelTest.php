@@ -101,4 +101,45 @@ class SorteoModelTest extends TestCase
         $responseAssertJson->where("code", 0);
         $responseAssertJson->has("data", 0);
     }
+
+    public function test_sorteos_disponibles()
+    {
+        $sorteo1 = Sorteo::factory()->create([
+            "fecha" => now()->subDay()
+        ]);
+
+        $sorteo2 = Sorteo::factory()->create([
+            "fecha" => now()->addDay()
+        ]);
+
+        $sorteo3 = Sorteo::factory()->create([
+            "fecha" => now()->addDay()
+        ]);
+
+        $responseAssertJson = AssertableJson::fromArray(
+            Sorteo::sorteosDisponibles()
+        );
+        $responseAssertJson->where("code", 0);
+        $responseAssertJson->count("data", 2);
+
+        $sorteo4 = Sorteo::factory()->create([
+            "fecha" => now()->addDay()
+        ]);
+        $responseAssertJson = AssertableJson::fromArray(
+            Sorteo::sorteosDisponibles()
+        );
+        $responseAssertJson->where("code", 0);
+        $responseAssertJson->count("data", 3);
+
+        $sorteo5 = Sorteo::factory()->create([
+            "fecha" => now()->addDay(),
+            "resultados" => "algo"
+        ]);
+
+        $responseAssertJson = AssertableJson::fromArray(
+            Sorteo::sorteosDisponibles()
+        );
+        $responseAssertJson->where("code", 0);
+        $responseAssertJson->count("data", 3);
+    }
 }

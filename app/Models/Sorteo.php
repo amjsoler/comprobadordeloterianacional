@@ -181,4 +181,49 @@ class Sorteo extends Model
 
         return $response;
     }
+
+    /**
+     * Función que devuelve la lista de sorteos disponibles
+     *
+     * @return [Sorteo]
+     *  0: OK
+     * -1: Excepción
+     */
+    public static function sorteosDisponibles()
+    {
+        $response = [
+            "code" => "",
+            "data" => ""
+        ];
+
+        try {
+            //Log de entrada
+            Log::debug("Entrando al sorteosDisponibles de Sorteo");
+
+            $sorteosDisponibles = Sorteo::whereNull("resultados")
+                ->where("fecha", ">", now())
+                ->get();
+
+            $response["code"] = 0;
+            $response["data"] = $sorteosDisponibles;
+
+        } catch (Exception $e) {
+            $response["code"] = -1;
+
+            Log::error($e->getMessage(),
+                array(
+                    "response: " => $response
+                )
+            );
+        }
+
+        //Log de salida
+        Log::debug("Saliendo del sorteosDisponibles de Resultado",
+            array(
+                "response: " => $response
+            )
+        );
+
+        return $response;
+    }
 }

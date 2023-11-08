@@ -164,4 +164,38 @@ class SorteosTest extends TestCase
         Notification::assertCount(3);
         Notification::assertSentTo($userRand, ComprobacionDecimo::class);
     }
+
+    public function test_sorteos_disponibles()
+    {
+        $this->get("/api/sorteos-disponibles")->assertStatus(302)->assertRedirect("/login");
+
+        $userRand = User::factory()->create(["email_verified_at" => now()]);
+
+        Auth::login($userRand);
+
+        $sorteo1 = Sorteo::factory()->create([
+            "fecha" => now()->subDay()
+        ]);
+
+        $sorteo2 = Sorteo::factory()->create([
+            "fecha" => now()->addDay()
+        ]);
+
+        $sorteo3 = Sorteo::factory()->create([
+            "fecha" => now()->addDay()
+        ]);
+
+        $sorteo4 = Sorteo::factory()->create([
+            "fecha" => now()->addDay()
+        ]);
+
+        $sorteo5 = Sorteo::factory()->create([
+            "fecha" => now()->addDay(),
+            "resultados" => "algo"
+        ]);
+
+        $this->get("/api/sorteos-disponibles")->assertStatus(200)
+            ->assertJsonCount(3);
+
+    }
 }

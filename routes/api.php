@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ApiAuthentication;
 use App\Http\Controllers\DecimoController;
+use App\Http\Controllers\web\SorteoController;
 use Illuminate\Support\Facades\Route;
 
 //////////////////////////////////////
@@ -46,6 +47,15 @@ Route::delete("/mis-decimos/{decimo}",
 )->middleware(["auth:sanctum", "cuentaVerificada"])
     ->can("delete", "decimo");
 
+
+
+////////////////////////////////
+/////// RUTAS DE DÉCIMOS ///////
+////////////////////////////////
+
+Route::get("/sorteos-disponibles",
+    [SorteoController::class, "dameSorteosDisponibles"]
+)->middleware(["auth:sanctum", "cuentaVerificada"]);
 
 
 /////////////////////////////////////
