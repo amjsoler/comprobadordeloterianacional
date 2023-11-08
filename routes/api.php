@@ -50,7 +50,7 @@ Route::delete("/mis-decimos/{decimo}",
 
 
 ////////////////////////////////
-/////// RUTAS DE DÉCIMOS ///////
+/////// RUTAS DE SORTEOS ///////
 ////////////////////////////////
 
 Route::get("/sorteos-disponibles",

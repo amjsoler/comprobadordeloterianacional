@@ -73,10 +73,10 @@ class CrearDecimoFormRequest extends FormRequest
     public function rules(): array
     {
         return [
-            "numero" => "required|string|max:5",
+            "numero" => "required|string|min:5|max:5",
             "reintegro" => "required|numeric",
-            "serie" => "numeric",
-            "fraccion" => "numeric",
+            "serie" => "nullable|numeric",
+            "fraccion" => "nullable|numeric",
             "cantidad" => "numeric",
             "sorteo" => "required|exists:sorteos,id"
         ];
@@ -87,6 +87,7 @@ class CrearDecimoFormRequest extends FormRequest
         return [
             "numero.required" => "El número no puede estar vacío",
             "numero.string" => "El número no tiene el formato correcto",
+            "numero.min" => "El número debe tener 5 cifras",
             "numero.max" => "El número debe tener 5 cifras",
             "reintegro.required" => "Debes especificar un reintegro",
             "reintegro.numeric" => "El reintegro no tiene un formato válido",
