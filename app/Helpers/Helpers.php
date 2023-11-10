@@ -10,10 +10,8 @@ use App\Notifications\NuevosResultadosDisponibles;
 use Carbon\Carbon;
 use DOMDocument;
 use Exception;
-use Faker\Extension\Helper;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\URL;
 
 class Helpers
 {
@@ -375,22 +373,42 @@ class Helpers
         return false;
     }
 
-    private static function interpretarCadenaResultados($resultados)
+    public static function interpretarCadenaResultados($resultados)
     {
         $coleccionResultados = collect();
 
-        $resultadosDesglosados = explode("\r\n", $resultados);
+        try{
+            Log::debug("Entrando a interpretarCadenaResultados de Helpers",
+            array(
+                "request: " => $resultados
+            ));
 
-        foreach($resultadosDesglosados as $resultadoRaw){
-            $resultadoRawDesglosado = explode(";", $resultadoRaw);
+            $resultadosDesglosados = explode("\r\n", $resultados);
 
-            $nombre = $resultadoRawDesglosado[0];
-            $numero = $resultadoRawDesglosado[1];
-            $premio = $resultadoRawDesglosado[2];
+            foreach($resultadosDesglosados as $resultadoRaw){
+                $resultadoRawDesglosado = explode(";", $resultadoRaw);
 
-            $coleccionAux = (object)["nombre" => $nombre, "numero" => $numero, "premio" => $premio];
-            $coleccionResultados->push($coleccionAux);
+                $nombre = $resultadoRawDesglosado[0];
+                $numero = $resultadoRawDesglosado[1];
+                $premio = $resultadoRawDesglosado[2];
+
+                $coleccionAux = (object)["nombre" => $nombre, "numero" => $numero, "premio" => $premio];
+                $coleccionResultados->push($coleccionAux);
+            }
+        }catch(Exception $e){
+            Log::error($e->getMessage(),
+            array(
+                compact("resultados")
+            ));
+
+            throw new Exception ("Excepción producida en interpretarcadenaresultados en helpers");
         }
+
+        Log::debug("Saliendo de interpretarCadenaResultados de Helpers",
+            array(
+                "request: " => compact("resultados"),
+                "response: " => $coleccionResultados
+            ));
 
         return $coleccionResultados;
     }

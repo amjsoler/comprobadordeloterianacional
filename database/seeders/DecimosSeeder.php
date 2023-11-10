@@ -16,12 +16,12 @@ class DecimosSeeder extends Seeder
     {
         $idUserPruebas = User::where("email", "amjsoler@gmail.com")->first()->id;
 
-        for($i=1;$i<100;$i++){
-            $idSorteo = Sorteo::find(rand(1,20))->id;
+        $sorteos = Sorteo::all();
 
-            Decimo::factory()->create([
+        foreach($sorteos as $sorteo){
+            Decimo::factory()->count(5)->create([
                 "usuario" => $idUserPruebas,
-                "sorteo" => $idSorteo
+                "sorteo" => $sorteo->id
             ]);
         }
     }

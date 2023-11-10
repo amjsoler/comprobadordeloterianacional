@@ -142,4 +142,44 @@ class SorteoModelTest extends TestCase
         $responseAssertJson->where("code", 0);
         $responseAssertJson->count("data", 3);
     }
+
+    public function test_dame_ultimos_sorteos_con_resultados()
+    {
+        $sorteo1 = Sorteo::factory()->create([
+            "fecha" => now()->subDay(),
+            "resultados" => "algo"
+        ]);
+
+        $sorteo2 = Sorteo::factory()->create([
+            "fecha" => now()->subDay(5),
+            "resultados" => "algo2"
+        ]);
+
+        $sorteo3 = Sorteo::factory()->create([
+            "fecha" => now()->subDay(10),
+            "resultados" => "algo3"
+        ]);
+
+        $responseAssertJson = AssertableJson::fromArray(
+            Sorteo::dameUltimosSorteosConResultado(10)
+        );
+        $responseAssertJson->where("code", 0);
+        $responseAssertJson->count("data", 3);
+
+        $sorteo4 = Sorteo::factory()->create([
+            "fecha" => now()->subDay(3),
+            "resultados" => "algo4"
+        ]);
+
+        $sorteo5 = Sorteo::factory()->create([
+            "fecha" => now()->subDay(2),
+        ]);
+
+        $responseAssertJson = AssertableJson::fromArray(
+            Sorteo::dameUltimosSorteosConResultado(10)
+        );
+        $responseAssertJson->where("code", 0);
+        $responseAssertJson->count("data", 4);
+        $responseAssertJson->where("data.1.resultados", "algo4");
+    }
 }

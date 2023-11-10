@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\CambiarContrasenaFormRequest;
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RegisterRequest;
 use App\Models\AccountVerifyToken;
@@ -136,7 +137,7 @@ class ApiAuthentication extends Controller
             $userResult = User::crearNuevoUsuario(
                 $request->get("name"),
                 $request->get("email"),
-                Hash::make($request->get("password"))
+                $request->get("password")
             );
 
             if($userResult["code"] == 0){
@@ -361,6 +362,73 @@ class ApiAuthentication extends Controller
                 )
             );
         }
+
+        return $response;
+    }
+
+    /**
+     * Método para que el usuario cambie la contraseña de acceso a la cuenta desde el perfil
+     *
+     * @param CambiarContrasenaFormRequest $request Contiene la contraseña actual y la nueva junto con su confirmation
+     *
+     * @return void
+     *   0: OK
+     * -11: Excepción
+     * -12: Error al guardar la nueva contraseña
+     */
+    public function cambiarContrasena(CambiarContrasenaFormRequest $request)
+    {
+        $response = [
+            "status" => "",
+            "code" => "",
+            "statusText" => "",
+            "data" => []
+        ];
+
+        try{
+            //Log de entrada
+            Log::debug("Entrando al cambiarContrasena de ApiAuthentication",
+                array(
+                    "userID: " => auth()->user()->id,
+                    "request: " => $request
+                )
+            );
+
+            $resultGuardarNuevaContrasena = User::guardarNuevoPass(auth()->user()->id, $request->get("nuevaContrasena"));
+
+            if($resultGuardarNuevaContrasena["code"] == 0){
+                $response["code"] = 0;
+                $response["status"] = 200;
+                $response["statusText"] = "ok";
+            }else{
+                $response["code"] = -12;
+                $response["status"] = 400;
+                $response["statusText"] = "ko";
+            }
+
+        }
+        catch(Exception $e){
+            $response["code"] = -11;
+            $response["status"] = 400;
+            $response["statusText"] = "ko";
+
+            Log::error($e->getMessage(),
+                array(
+                    "userID: " => auth()->user()->id,
+                    "request: " => $request,
+                    "response: " => $response
+                )
+            );
+        }
+
+        //Log de salida
+        Log::debug("Saliendo del cambiarContrasena de ApiAuthentication",
+            array(
+                "userID: " => auth()->user()->id,
+                "request: " => $request,
+                "response: " => $response
+            )
+        );
 
         return $response;
     }

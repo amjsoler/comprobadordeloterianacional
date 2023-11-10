@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\web;
 
 use App\Events\NuevosResultadosGuardados;
+use App\Helpers\Helpers;
 use App\Http\Controllers\Controller;
-use App\Models\Decimo;
 use App\Models\Sorteo;
 use Exception;
 use Illuminate\Http\Request;
@@ -130,6 +130,72 @@ class SorteoController extends Controller
         Log::debug("Saliendo del dameSorteosDisponibles de SorteoController",
             array(
                 "usuarioID: " => auth()->user()->id,
+                "response: " => $response
+            )
+        );
+
+        return response()->json(
+            $response["data"],
+            $response["status"]
+        );
+    }
+
+    public function dameUltimosResultados()
+    {
+        $response = [
+            "status" => "",
+            "code" => "",
+            "statusText" => "",
+            "data" => []
+        ];
+
+        try{
+            //Log de entrada
+            Log::debug("Entrando al dameUltimosResultados de SorteoController");
+
+            //Creo el nuevo token
+            $resultResultadosDisponibles = Sorteo::dameUltimosSorteosConResultado(10);
+
+            if($resultResultadosDisponibles["code"] == 0){
+                $resultResultadosDisponibles = $resultResultadosDisponibles["data"];
+                //Ahora convertimos la cadena de resultados en algo legible
+
+                foreach($resultResultadosDisponibles as $sorteo){
+                    $sorteo->resultados = Helpers::interpretarCadenaResultados($sorteo->resultados);
+                }
+
+                $response["code"] = 0;
+                $response["status"] = 200;
+                $response["statusText"] = "ok";
+                $response["data"] = $resultResultadosDisponibles;
+            }else{
+                $response["code"] = -12;
+                $response["status"] = 400;
+                $response["statusText"] = "ko";
+
+                Log::error("No debería fallar la consulta de últimos sorteos",
+                    array(
+                        "response: " => $response
+                    )
+                );
+            }
+
+        }
+        catch(Exception $e){
+            $response["code"] = -11;
+            $response["status"] = 400;
+            $response["statusText"] = "ko";
+
+            Log::error($e->getMessage(),
+                array(
+                    "response: " => $response
+                )
+            );
+        }
+
+        //Log de salida
+        Log::debug("Saliendo del dameUltimosResultados de SorteoController",
+            array(
                 "response: " => $response
             )
         );

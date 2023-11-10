@@ -2,11 +2,12 @@
 
 namespace App\Http\Requests;
 
+use App\Rules\ContrasenaActualCorrectaRule;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Log;
 
-class ComprobarDecimoFormRequest extends FormRequest
+class CambiarContrasenaFormRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -23,7 +24,7 @@ class ComprobarDecimoFormRequest extends FormRequest
      */
     protected function prepareForValidation()
     {
-        Log::debug("Entrando a validación del ComprobarDecimoFormRequest",
+        Log::debug("Entrando a validación del CambiarContrasenaFormRequest",
             array(
                 "request:" => $this->request->all()
             )
@@ -41,7 +42,7 @@ class ComprobarDecimoFormRequest extends FormRequest
      */
     protected function failedValidation(Validator $validator)
     {
-        Log::debug("Saliendo del validador de ComprobarDecimoFormRequest. Status: KO",
+        Log::debug("Saliendo del validador de CambiarContrasenaFormRequest. Status: KO",
             array(
                 "request:" => $this->request->all()
             )
@@ -56,7 +57,7 @@ class ComprobarDecimoFormRequest extends FormRequest
      */
     protected function passedValidation()
     {
-        Log::debug("Saliendo del validador de ComprobarDecimoFormRequest. Status: OK",
+        Log::debug("Saliendo del validador de CambiarContrasenaFormRequest. Status: OK",
             array(
                 "request:" => $this->request->all()
             )
@@ -73,26 +74,18 @@ class ComprobarDecimoFormRequest extends FormRequest
     public function rules(): array
     {
         return [
-            "numero" => "required|string|min:5|max:5",
-            "reintegro" => "required|numeric",
-            "serie" => "nullable|numeric",
-            "fraccion" => "nullable|numeric",
-            "sorteo" => "required|exists:sorteos,id"
+            "contrasenaActual" => ["required", new ContrasenaActualCorrectaRule()],
+            "nuevaContrasena" => "required|confirmed"
         ];
     }
 
     public function messages()
     {
         return [
-            "numero.required" => "El número no puede estar vacío",
-            "numero.string" => "El número no tiene el formato correcto",
-            "numero.max" => "El número debe tener 5 cifras",
-            "reintegro.required" => "Debes especificar un reintegro",
-            "reintegro.numeric" => "El reintegro no tiene un formato válido",
-            "serie.numeric" => "La serie no tiene un formato válido",
-            "fraccion.numeric" => "La fracción no tiene un formato válido",
-            "sorteo.required" => "Debes especificar el sorteo al que pertenece este número",
-            "sorteo.exists" => "El sorteo especificado no es válido",
+            "contrasenaActual.required" => "La contraseña actual no puede estar vacía",
+            "contrasenaActual.ContrasenaActualCorrectaRule" => "La contraseña actual no es correcta",
+            "nuevaContrasena.required" => "Debes especificar la contraseña nueva",
+            "nuevaContrasena.confirmed" => "Las contraseñas no coinciden",
         ];
     }
 }

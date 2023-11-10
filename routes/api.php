@@ -25,6 +25,10 @@ Route::get("/verificar-cuenta",
     [ApiAuthentication::class, "mandarCorreoVerificacionCuenta"]
 )->middleware("auth:sanctum");
 
+Route::post("/cambiar-contrasena",
+    [ApiAuthentication::class, "cambiarContrasena"]
+)->middleware("auth:sanctum", "cuentaVerificada");
+
 ////////////////////////////////
 /////// RUTAS DE DÉCIMOS ///////
 ////////////////////////////////
@@ -57,6 +61,9 @@ Route::get("/sorteos-disponibles",
     [SorteoController::class, "dameSorteosDisponibles"]
 )->middleware(["auth:sanctum", "cuentaVerificada"]);
 
+Route::get("/ultimos-resultados",
+    [SorteoController::class, "dameUltimosResultados"]
+);
 
 /////////////////////////////////////
 /////// RUTAS DE COMPROBACIÓN ///////

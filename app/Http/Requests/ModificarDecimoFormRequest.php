@@ -75,8 +75,8 @@ class ModificarDecimoFormRequest extends FormRequest
         return [
             "numero" => "required|string|max:5",
             "reintegro" => "required|numeric",
-            "serie" => "numeric",
-            "fraccion" => "numeric",
+            "serie" => "nullable|numeric",
+            "fraccion" => "nullable|numeric",
             "cantidad" => "numeric",
             "sorteo" => "required|exists:sorteos,id"
         ];

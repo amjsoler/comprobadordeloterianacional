@@ -201,7 +201,7 @@ class Sorteo extends Model
             Log::debug("Entrando al sorteosDisponibles de Sorteo");
 
             $sorteosDisponibles = Sorteo::whereNull("resultados")
-                ->where("fecha", ">", now())
+                ->where("fecha", ">=", now())
                 ->get();
 
             $response["code"] = 0;
@@ -219,6 +219,57 @@ class Sorteo extends Model
 
         //Log de salida
         Log::debug("Saliendo del sorteosDisponibles de Resultado",
+            array(
+                "response: " => $response
+            )
+        );
+
+        return $response;
+    }
+
+    /**
+     * Devuelve los últimos X sorteos que tengan resultados, siendo X el número max de sorteos con resultados a devolver
+     *
+     * @param int $cantidadSorteos El número máximo de sorteos con resultado a devolver
+     *
+     * @return [Sorteo] Los sorteos con resultados
+     *
+     *  0: OK
+     * -1: Excepción
+     * -2: Error al buscar los sorteos
+     */
+    public static function dameUltimosSorteosConResultado(int $cantidadSorteos)
+    {
+        $response = [
+            "code" => "",
+            "data" => ""
+        ];
+
+        try {
+            //Log de entrada
+            Log::debug("Entrando al dameUltimosSorteosConResultado de Sorteo");
+
+            $sorteosConResultadoDisponibles = Sorteo::whereNotNull("resultados")
+                ->where("fecha", "<=", now())
+                ->orderBy("fecha", "desc")
+                ->limit($cantidadSorteos)
+                ->get();
+
+            $response["code"] = 0;
+            $response["data"] = $sorteosConResultadoDisponibles;
+
+        } catch (Exception $e) {
+            $response["code"] = -1;
+
+            Log::error($e->getMessage(),
+                array(
+                    "response: " => $response
+                )
+            );
+        }
+
+        //Log de salida
+        Log::debug("Saliendo del dameUltimosSorteosConResultado de Resultado",
             array(
                 "response: " => $response
             )

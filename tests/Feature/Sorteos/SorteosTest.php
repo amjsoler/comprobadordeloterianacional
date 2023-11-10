@@ -12,6 +12,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Testing\Fluent\AssertableJson;
 use Tests\TestCase;
 
 class SorteosTest extends TestCase
@@ -197,5 +198,44 @@ class SorteosTest extends TestCase
         $this->get("/api/sorteos-disponibles")->assertStatus(200)
             ->assertJsonCount(3);
 
+    }
+
+    public function test_ultimos_resultados()
+    {
+        $this->get("/api/ultimos-resultados")->assertStatus(200)->assertJsonCount(0);
+
+        $sorteo1 = Sorteo::factory()->create([
+            "fecha" => now()->subDay(10),
+            "resultados" => "especial;12345&4&3;14000000\r\nespecial;12345&4&3;14000000\r\nespecial;12345&4&3;14000000"
+        ]);
+
+        $sorteo2 = Sorteo::factory()->create([
+            "fecha" => now()->subDay(2),
+            "resultados" => "primero;67890&4&3;30000\r\nprimero;67890&4&3;30000"
+        ]);
+
+        $sorteo3 = Sorteo::factory()->create([
+            "fecha" => now()->subDay(8),
+            "resultados" => "primero;67890&4&3;30000"
+        ]);
+
+        $sorteo4 = Sorteo::factory()->create([
+            "fecha" => now()->subDay(1),
+            "resultados" => "primero;67890&4&3;30000"
+        ]);
+
+        $sorteo5 = Sorteo::factory()->create([
+            "fecha" => now()->subDay(3),
+        ]);
+
+        $this->get("/api/ultimos-resultados")->assertStatus(200)
+            ->assertJsonCount(4)
+            ->assertJson(fn (AssertableJson $json) => $json
+                ->count(4)
+                ->count("0.resultados", 1)
+                ->count("1.resultados", 2)
+                ->count("2.resultados", 1)
+                ->count("3.resultados", 3)
+            );
     }
 }
