@@ -277,4 +277,119 @@ class Sorteo extends Model
 
         return $response;
     }
+
+    /**
+     * Método que devuelve el id del sorteo pasado como parámetro equivalente a la fecha pasada
+     *
+     * @param String $fechaSorteo fecha del sorteo sobre el que buscar
+     *
+     * @return int El identificador del sorteo
+     *  0: OK
+     * -1: Excepción
+     * -2: Sorteo no encontrado
+     */
+    public static function dameIdSorteoDadaFecha($fechaSorteo)
+    {
+        $response = [
+            "code" => "",
+            "data" => ""
+        ];
+
+        try {
+            //Log de entrada
+            Log::debug("Entrando al dameIdSorteoDadaFecha de Sorteo",
+            array(
+                "request: " => $fechaSorteo
+            ));
+
+            $sorteoCorrespondienteALaFecha = Sorteo::where("fecha", "=", $fechaSorteo)
+                ->first();
+
+            if($sorteoCorrespondienteALaFecha){
+                $response["code"] = 0;
+                $response["data"] = $sorteoCorrespondienteALaFecha;
+            }else{
+                $response["code"] = -2;
+            }
+
+        } catch (Exception $e) {
+            $response["code"] = -1;
+
+            Log::error($e->getMessage(),
+                array(
+                    "request: " => $fechaSorteo,
+                    "response: " => $response
+                )
+            );
+        }
+
+        //Log de salida
+        Log::debug("Saliendo del dameIdSorteoDadaFecha de Resultado",
+            array(
+                "response: " => $response
+            )
+        );
+
+        return $response;
+    }
+
+    /**
+     * Método que archiva/softdelete los décimos del sorteo y usuario pasados por parámetro
+     *
+     * @param int $userId El usuario propietario de los décimos
+     * @param int $sorteoId El sorteo del cual archivar décimos
+     *
+     * @return [int]
+     *  0: OK
+     * -1: Excepción
+     * -2: Error al borrar los décimos
+     */
+    public static function archivarDecimosSorteoPasado(int $userId, int $sorteoId)
+    {
+        $response = [
+            "code" => "",
+            "data" => ""
+        ];
+
+        try {
+            //Log de entrada
+            Log::debug("Entrando al archivarDecimosSorteoPasado de Sorteo",
+                array(
+                    "request: " => compact("userId", "sorteoId")
+                )
+            );
+
+            $resultBorrado = Decimo::where("usuario", $userId)
+                ->where("sorteo", $sorteoId);
+
+            $auxIds = $resultBorrado->get("id")->toArray();
+
+            if($resultBorrado->delete()){
+                $response["code"] = 0;
+                $response["data"] = $auxIds;
+            }else{
+                $response["code"] = -2;
+            }
+
+        } catch (Exception $e) {
+            $response["code"] = -1;
+
+            Log::error($e->getMessage(),
+                array(
+                    "request: " => compact("userId", "sorteoId"),
+                    "response: " => $response
+                )
+            );
+        }
+
+        //Log de salida
+        Log::debug("Saliendo del archivarDecimosSorteoPasado de Resultado",
+            array(
+                "request: " => compact("userId", "sorteoId"),
+                "response: " => $response
+            )
+        );
+
+        return $response;
+    }
 }

@@ -182,4 +182,33 @@ class SorteoModelTest extends TestCase
         $responseAssertJson->count("data", 4);
         $responseAssertJson->where("data.1.resultados", "algo4");
     }
+
+    public function test_id_sorteo_dada_fecha()
+    {
+        $this->refreshDatabase();
+
+        $sorteo1 = Sorteo::factory()->create([
+            "fecha" => "2023-11-10",
+            "resultados" => "algo"
+        ]);
+
+        $sorteo2 = Sorteo::factory()->create([
+            "fecha" => "2023-11-9",
+            "resultados" => "algo2"
+        ]);
+
+        $sorteo3 = Sorteo::factory()->create([
+            "fecha" => "2023-09-03",
+            "resultados" => "algo3"
+        ]);
+
+        $responseAssertJson = AssertableJson::fromArray(
+            Sorteo::dameIdSorteoDadaFecha("2023-01-01")
+        )->where("code", -2);
+
+        $responseAssertJson = AssertableJson::fromArray(
+            Sorteo::dameIdSorteoDadaFecha("2023-11-09")
+        )->where("code", 0)
+            ->where("data.fecha", "2023-11-09");
+    }
 }

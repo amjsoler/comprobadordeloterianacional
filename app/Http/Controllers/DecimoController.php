@@ -9,6 +9,7 @@ use App\Http\Requests\ModificarDecimoFormRequest;
 use App\Models\Decimo;
 use App\Models\Sorteo;
 use Exception;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
 class DecimoController extends Controller
@@ -426,6 +427,86 @@ class DecimoController extends Controller
         Log::debug("Saliendo del comprobarDecimo de DecimoController",
             array(
                 "request: " => $request->all(),
+                "response: " => $response
+            )
+        );
+
+        return response()->json(
+            $response["data"],
+            $response["status"]
+        );
+    }
+
+    /**
+     * Método para archivar/soft delete de los décimos que pertenecen al sorteo pasado como param
+     *
+     * @param Request $request Request que contiene el
+     * @param Sorteo $sorteo
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function archivarDecimosDeSorteo(Sorteo $sorteo)
+    {
+        $response = [
+            "status" => "",
+            "code" => "",
+            "statusText" => "",
+            "data" => []
+        ];
+
+        try{
+            //Log de entrada
+            Log::debug("Entrando al archivarDecimosDeSorteo de DecimoController",
+                array(
+                    "userID: " => auth()->user()->id,
+                    "request: " => compact("sorteo")
+                )
+            );
+
+            //Primero compruebo si están ya disponibles los resultado
+            $resultArchivarDecimos = Sorteo::archivarDecimosSorteoPasado(auth()->user()->id, $sorteo->id);
+
+            if($resultArchivarDecimos["code"] == 0){
+                $resultArchivarDecimos = $resultArchivarDecimos["data"];
+
+                $response["code"] = 0;
+                $response["status"] = 200;
+                $response["statusText"] = "ok";
+                $response["data"] = $resultArchivarDecimos;
+            }
+            else{
+                $response["code"] = -12;
+                $response["status"] = 400;
+                $response["statusText"] = "ko";
+
+                Log::error("No debería fallar una consulta de eliminación",
+                    array(
+                        "userID: " => auth()->user()->id,
+                        "request: " => compact("sorteo"),
+                        "response: " => $response
+                    )
+                );
+            }
+
+        }
+        catch(Exception $e){
+            $response["code"] = -11;
+            $response["status"] = 400;
+            $response["statusText"] = "ko";
+
+            Log::error($e->getMessage(),
+                array(
+                    "userID: " => auth()->user()->id,
+                    "request: " => compact("sorteo"),
+                    "response: " => $response
+                )
+            );
+        }
+
+        //Log de salida
+        Log::debug("Saliendo del archivarDecimosDeSorteo de DecimoController",
+            array(
+                "userID: " => auth()->user()->id,
+                "request: " => compact("sorteo"),
                 "response: " => $response
             )
         );

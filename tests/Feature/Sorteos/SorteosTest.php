@@ -8,6 +8,7 @@ use App\Models\Decimo;
 use App\Models\Sorteo;
 use App\Models\User;
 use App\Notifications\ComprobacionDecimo;
+use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Event;
@@ -237,5 +238,29 @@ class SorteosTest extends TestCase
                 ->count("2.resultados", 1)
                 ->count("3.resultados", 3)
             );
+    }
+
+    public function test_id_sorteo_dada_fecha()
+    {
+        $response = $this->post("/api/id-sorteo-dada-fecha",
+            array(
+                "fechaSorteo" => "2023-11-09"
+            )
+        );
+
+        $response->assertStatus(302)
+        ->isInvalid();
+
+        $sorteo1 = Sorteo::factory()->create([
+            "fecha" => "2023-11-09",
+        ]);
+
+        $response = $this->post("/api/id-sorteo-dada-fecha", ["fechaSorteo" => "2023-11-09"])
+            ->assertStatus(200);
+
+        $response->assertJson(fn (AssertableJson $json) => $json
+            ->where("id", $sorteo1->id)
+            ->etc()
+        );
     }
 }

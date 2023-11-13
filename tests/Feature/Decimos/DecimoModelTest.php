@@ -158,4 +158,31 @@ class DecimoModelTest extends TestCase
         $decimoRand3->save();
         $this->assertEquals("1500", $decimoRand3->premio);
     }
+
+    public function test_archivar_decimos_sorteo_pasado()
+    {
+        $userRand = User::factory()->create();
+        $sorteoRand = Sorteo::factory()->create();
+        $decimoRand1 = Decimo::factory()->create(["usuario" => $userRand->id, "sorteo" => $sorteoRand->id]);
+        $decimoRand2 = Decimo::factory()->create(["usuario" => $userRand->id, "sorteo" => $sorteoRand->id]);
+
+        //Usuario y sorteo invent
+        $result = Sorteo::archivarDecimosSorteoPasado(-1, -2);
+        $assertableJsonResponse = AssertableJson::fromArray($result);
+        $assertableJsonResponse->where("code", -2);
+
+        //Sorteo no tiene décimos del usuario
+        $result = Sorteo::archivarDecimosSorteoPasado($userRand->id, 2);
+        $assertableJsonResponse = AssertableJson::fromArray($result);
+        $assertableJsonResponse
+            ->where("code", -2);
+
+        //archivamos y comprobamos
+        $result = Sorteo::archivarDecimosSorteoPasado($userRand->id, $sorteoRand->id);
+        $assertableJsonResponse = AssertableJson::fromArray($result);
+        $assertableJsonResponse
+            ->where("code", 0)
+            ->count("data",2)
+        ->where("data.0.id", $decimoRand1->id);
+    }
 }

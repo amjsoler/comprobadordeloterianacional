@@ -5,6 +5,7 @@ namespace App\Http\Controllers\web;
 use App\Events\NuevosResultadosGuardados;
 use App\Helpers\Helpers;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\DameIdSorteoDadaFechaFormRequest;
 use App\Models\Sorteo;
 use Exception;
 use Illuminate\Http\Request;
@@ -195,6 +196,70 @@ class SorteoController extends Controller
 
         //Log de salida
         Log::debug("Saliendo del dameUltimosResultados de SorteoController",
+            array(
+                "response: " => $response
+            )
+        );
+
+        return response()->json(
+            $response["data"],
+            $response["status"]
+        );
+    }
+
+    /**
+     * Método que devuelve el identificador de un sorteo dada la fecha de dicho sorteo
+     *
+     * @param DameIdSorteoDadaFechaFormRequest $request La fecha del sorteo a buscar
+     *
+     * @return int El identificador del sorteo
+     *   0: OK
+     * -11: Excepción
+     * -12: Sorteo no encontrado
+     */
+    public function dameIdSorteoDadaLaFecha(DameIdSorteoDadaFechaFormRequest $request) {
+        $response = [
+            "status" => "",
+            "code" => "",
+            "statusText" => "",
+            "data" => []
+        ];
+
+        try{
+            //Log de entrada
+            Log::debug("Entrando al dameIdSorteoDadaLaFecha de SorteoController");
+
+            //Creo el nuevo token
+            $resultIdSorteoDadaFecha = Sorteo::dameIdSorteoDadaFecha($request->get("fechaSorteo"));
+
+            if($resultIdSorteoDadaFecha["code"] == 0){
+                $resultIdSorteoDadaFecha = $resultIdSorteoDadaFecha["data"];
+
+                $response["code"] = 0;
+                $response["status"] = 200;
+                $response["statusText"] = "ok";
+                $response["data"] = $resultIdSorteoDadaFecha;
+            }else{
+                $response["code"] = -12;
+                $response["status"] = 400;
+                $response["statusText"] = "ko";
+            }
+
+        }
+        catch(Exception $e){
+            $response["code"] = -11;
+            $response["status"] = 400;
+            $response["statusText"] = "ko";
+
+            Log::error($e->getMessage(),
+                array(
+                    "response: " => $response
+                )
+            );
+        }
+
+        //Log de salida
+        Log::debug("Saliendo del dameIdSorteoDadaLaFecha de SorteoController",
             array(
                 "response: " => $response
             )

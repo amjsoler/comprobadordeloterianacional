@@ -51,7 +51,9 @@ Route::delete("/mis-decimos/{decimo}",
 )->middleware(["auth:sanctum", "cuentaVerificada"])
     ->can("delete", "decimo");
 
-
+Route::get("/archivar-decimos/{sorteo}",
+    [DecimoController::class, "archivarDecimosDeSorteo"]
+)->middleware(["auth:sanctum", "cuentaVerificada"]);
 
 ////////////////////////////////
 /////// RUTAS DE SORTEOS ///////
@@ -63,6 +65,10 @@ Route::get("/sorteos-disponibles",
 
 Route::get("/ultimos-resultados",
     [SorteoController::class, "dameUltimosResultados"]
+);
+
+Route::post("/id-sorteo-dada-fecha",
+    [SorteoController::class, "dameIdSorteoDadaLaFecha"]
 );
 
 /////////////////////////////////////

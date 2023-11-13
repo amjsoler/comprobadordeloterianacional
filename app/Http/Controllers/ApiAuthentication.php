@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\CambiarContrasenaFormRequest;
 use App\Http\Requests\LoginRequest;
+use App\Http\Requests\RecuperarCuentaFormRequest;
 use App\Http\Requests\RegisterRequest;
 use App\Models\AccountVerifyToken;
 use App\Models\RecuperarCuentaToken;
@@ -226,7 +227,7 @@ class ApiAuthentication extends Controller
      * -11: Excepción
      * -12: Fallo al crear el token de recuperación
      */
-    public function recuperarCuenta(Request $request)
+    public function recuperarCuenta(RecuperarCuentaFormRequest $request)
     {
         $response = [
             "status" => "",
@@ -242,31 +243,38 @@ class ApiAuthentication extends Controller
                     "request: " => $request->all()
                 ));
 
-            $resultDameUsuario = User::dameUsuarioDadoCorreo($request->get("correo"));
+            //Si tiene algo el correo sigo, si no, envío una respuesta ok (no queremos dar info al posible atacante)
+            if($request->get("correo")){
+                $resultDameUsuario = User::dameUsuarioDadoCorreo($request->get("correo"));
 
-            if($resultDameUsuario["code"] == 0){
-                $usuario = $resultDameUsuario["data"];
+                if($resultDameUsuario["code"] == 0){
+                    $usuario = $resultDameUsuario["data"];
 
-                //Creo el nuevo token
-                $validez = now()->addMinute(env("TIEMPO_VALIDEZ_TOKEN_RECUPERAR_CUENTA_EN_MINUTOS"));
-                $result = RecuperarCuentaToken::crearTokenDeRecuperacionCuenta($usuario->id, $validez);
+                    //Creo el nuevo token
+                    $validez = now()->addMinute(env("TIEMPO_VALIDEZ_TOKEN_RECUPERAR_CUENTA_EN_MINUTOS"));
+                    $result = RecuperarCuentaToken::crearTokenDeRecuperacionCuenta($usuario->id, $validez);
 
-                if($result["code"] == 0){
-                    //Se ha creado el token correctamente, ahora lo mando por correo
-                    $tokenCreado = $result["data"];
-                    $usuario->notify(new RecuperarCuenta($tokenCreado->token));
+                    if($result["code"] == 0){
+                        //Se ha creado el token correctamente, ahora lo mando por correo
+                        $tokenCreado = $result["data"];
+                        $usuario->notify(new RecuperarCuenta($tokenCreado->token));
+
+                        $response["code"] = 0;
+                        $response["status"] = 200;
+                        $response["statusText"] = "ok";
+                    }else{
+                        $response["code"] = -12;
+                        $response["status"] = 400;
+                        $response["statusText"] = "ko";
+                    }
+                }else{
+                    //Si no se encuentra al usuario respondo con OK porque no quiero dar info de si existe el correo o no
 
                     $response["code"] = 0;
                     $response["status"] = 200;
                     $response["statusText"] = "ok";
-                }else{
-                    $response["code"] = -12;
-                    $response["status"] = 400;
-                    $response["statusText"] = "ko";
                 }
             }else{
-                //Si no se encuentra al usuario respondo con OK porque no quiero dar info de si existe el correo o no
-
                 $response["code"] = 0;
                 $response["status"] = 200;
                 $response["statusText"] = "ok";
