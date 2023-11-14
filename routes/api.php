@@ -3,6 +3,8 @@
 use App\Http\Controllers\ApiAuthentication;
 use App\Http\Controllers\DecimoController;
 use App\Http\Controllers\web\SorteoController;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
 
 //////////////////////////////////////
@@ -77,4 +79,15 @@ Route::post("/id-sorteo-dada-fecha",
 
 Route::post("/comprobar-decimo",
     [DecimoController::class, "comprobarDecimo"]
+);
+
+
+
+///////////////////////////////////////
+/////// RUTAS DE LOG DE ERRORES ///////
+///////////////////////////////////////
+
+Route::post("/log-error", function(Request $request){
+        Log::channel("front")->error($request->get("message"), $request->get("context"));
+    }
 );

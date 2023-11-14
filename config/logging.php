@@ -52,6 +52,13 @@ return [
     */
 
     'channels' => [
+        'front' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/front/log.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
+            'days' => 30,
+            'replace_placeholders' => true,
+        ],
         'stack' => [
             'driver' => 'stack',
             'channels' => ['single'],
@@ -60,16 +67,16 @@ return [
 
         'single' => [
             'driver' => 'single',
-            'path' => storage_path('logs/laravel.log'),
+            'path' => storage_path('logs/server/log.log'),
             'level' => env('LOG_LEVEL', 'debug'),
             'replace_placeholders' => true,
         ],
 
         'daily' => [
             'driver' => 'daily',
-            'path' => storage_path('logs/laravel.log'),
+            'path' => storage_path('logs/server/log.log'),
             'level' => env('LOG_LEVEL', 'debug'),
-            'days' => 14,
+            'days' => 30,
             'replace_placeholders' => true,
         ],
 
