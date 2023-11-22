@@ -56,7 +56,7 @@ class Sorteo extends Model
 
             if($resultados && $resultados->resultados){
                 $response["code"] = 0;
-                $response["data"] = $resultados;
+                $response["data"] = $resultados->resultados;
             }else{
                 $response["code"] = -2;
             }

@@ -19,17 +19,8 @@ class SorteosSeeder extends Seeder
 
         $nombreSorteos = ["Sorteo de Jueves", "Sorteo de Sábado"];
 
-        //Creo sorteos caducados sin resultado
-        for($i=1;$i<=20;$i++){
-            Sorteo::factory()->create([
-                "nombre" => $nombreSorteos[rand(0,1)],
-                "numero_sorteo" => $i,
-                "fecha" => now()->subDay($i)
-            ]);
-        }
-
         //Creo sorteos caducados con resultado
-        for($i=1;$i<=20;$i++){
+        for($i=1;$i<=10;$i++){
             Sorteo::factory()->create([
                 "nombre" => $nombreSorteos[rand(0,1)],
                 "numero_sorteo" => $i+20,
@@ -39,7 +30,7 @@ class SorteosSeeder extends Seeder
         }
 
         //Creo sorteos futuros
-        for($i=1;$i<=20;$i++){
+        for($i=1;$i<=10;$i++){
             Sorteo::factory()->create([
                 "nombre" => $nombreSorteos[rand(0,1)],
                 "numero_sorteo" => $i+40,
