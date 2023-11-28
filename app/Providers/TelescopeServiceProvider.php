@@ -14,9 +14,10 @@ class TelescopeServiceProvider extends TelescopeApplicationServiceProvider
      */
     public function register(): void
     {
-        // Telescope::night();
+        Telescope::night();
 
-        $this->hideSensitiveRequestDetails();
+        //No quiero quitar datos sensibles puesto que el token me vale para identificar al usuario en todo el trayecto de peticiones
+        //$this->hideSensitiveRequestDetails();
 
         Telescope::filter(function (IncomingEntry $entry) {
             if ($this->app->environment('local')) {
@@ -58,7 +59,7 @@ class TelescopeServiceProvider extends TelescopeApplicationServiceProvider
     {
         Gate::define('viewTelescope', function ($user) {
             return in_array($user->email, [
-                //
+                env("ADMIN_AUTORIZADO")
             ]);
         });
     }
