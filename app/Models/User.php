@@ -418,4 +418,63 @@ class User extends Authenticatable
 
         return $response;
     }
+
+    public static function guardarAjustesCuentaUsuario(
+        int $userId,
+        boolean $alertaPorCorreo,
+        boolean $alertaPorNotificacion)
+    {
+        $response = [
+            "code" => "",
+            "data" => ""
+        ];
+
+        try{
+            //Log de entrada
+            Log::debug("Entrando al guardarAjustesCuentaUsuario de User",
+                array(
+                    "request: " => compact("userId", "alertaPorCorreo", "alertaPorNotificacion")
+                )
+            );
+
+            //Acción
+            $result = User::find($userId);
+
+            if($result){
+                $result->alertaporcorreo = $alertaPorCorreo;
+                $result->alertapornotificaion = $alertaPorNotificacion;
+
+                if($result->save()){
+                    $response["code"] = 0;
+                }
+                else{
+                    $response["code"] = -3;
+                }
+            }else{
+                $response["code"] = -2;
+            }
+
+
+        }
+        catch(Exception $e){
+            $response["code"] = -1;
+
+            Log::error($e->getMessage(),
+                array(
+                    "request: " => compact("userId", "alertaPorCorreo", "alertaPorNotificacion"),
+                    "response: " => $response
+                )
+            );
+        }
+
+        //Log de salida
+        Log::debug("Saliendo del guardarAjustesCuentaUsuario de User",
+            array(
+                "request: " => compact("userId", "alertaPorCorreo", "alertaPorNotificacion"),
+                "response: " => $response
+            )
+        );
+
+        return $response;
+    }
 }

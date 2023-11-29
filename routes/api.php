@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ApiAuthentication;
 use App\Http\Controllers\DecimoController;
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\web\SorteoController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -29,6 +30,10 @@ Route::get("/verificar-cuenta",
 
 Route::post("/cambiar-contrasena",
     [ApiAuthentication::class, "cambiarContrasena"]
+)->middleware("auth:sanctum", "cuentaVerificada");
+
+Route::post("/ajustes-cuenta",
+    [UserController::class, "guardarAjustesCuentaUsuario"]
 )->middleware("auth:sanctum", "cuentaVerificada");
 
 ////////////////////////////////
