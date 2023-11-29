@@ -76,4 +76,20 @@ class UserModelTest extends TestCase
         );
         $assertableJsonResponse->where("code", 0);
     }
+
+    public function test_almacenar_firebase_token()
+    {
+        $assertableJsonResponse = AssertableJson::fromArray(
+            User::almacenarFirebaseToken("token", -3)
+        );
+        $assertableJsonResponse->where("code", -2);
+
+        $userRand = User::factory()->create();
+        $assertableJsonResponse = AssertableJson::fromArray(
+            User::almacenarFirebaseToken("token", $userRand->id)
+        );
+        $assertableJsonResponse->where("code", 0);
+
+        $this->assertEquals("token", User::find($userRand->id)->firebasetoken);
+    }
 }

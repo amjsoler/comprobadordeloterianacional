@@ -351,4 +351,71 @@ class User extends Authenticatable
 
         return $response;
     }
+
+    /**
+     * Método para almacenar el token de firebase al usuario pasado como parámetro
+     *
+     * @param string $token Token a almacenar
+     * @param int $userId Usuario al que asociar el token
+     *
+     * @return void
+     *  0: OK
+     * -1: Excepción
+     * -2: Usuario no encontrado
+     * -3: Error al guardar los datos
+     */
+    public static function almacenarFirebaseToken(string $token, int $userId)
+    {
+        $response = [
+            "code" => "",
+            "data" => ""
+        ];
+
+        try{
+            //Log de entrada
+            Log::debug("Entrando al almacenarFirebaseToken de User",
+                array(
+                    "request: " => compact("token", "userId")
+                )
+            );
+
+            //Acción
+            $result = User::find($userId);
+
+            if($result){
+                $result->firebasetoken = $token;
+
+                if($result->save()){
+                    $response["code"] = 0;
+                }
+                else{
+                    $response["code"] = -3;
+                }
+            }else{
+                $response["code"] = -2;
+            }
+
+
+        }
+        catch(Exception $e){
+            $response["code"] = -1;
+
+            Log::error($e->getMessage(),
+                array(
+                    "request: " => compact("token", "userId"),
+                    "response: " => $response
+                )
+            );
+        }
+
+        //Log de salida
+        Log::debug("Saliendo del almacenarFirebaseToken de User",
+            array(
+                "request: " => compact("token", "userId"),
+                "response: " => $response
+            )
+        );
+
+        return $response;
+    }
 }
