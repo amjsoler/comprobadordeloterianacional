@@ -2,10 +2,13 @@
 
 namespace App\Notifications;
 
+use App\Notifications\Canales\FirebaseChannel;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use Illuminate\Support\Arr;
+use Kreait\Firebase\Messaging\CloudMessage;
 
 class PruebaQueuedBorrar extends Notification implements ShouldQueue
 {
@@ -26,7 +29,17 @@ class PruebaQueuedBorrar extends Notification implements ShouldQueue
      */
     public function via(object $notifiable): array
     {
-        return ['mail'];
+        $responseArray = array();
+
+        if($notifiable->alertasporcorreo){
+            $responseArray = Arr::add("mail");
+        }
+
+        if($notifiable->alertaspornotificacion){
+            $responseArray = Arr::add(FirebaseChannel::class);
+        }
+
+        return $responseArray;
     }
 
     /**
@@ -37,6 +50,21 @@ class PruebaQueuedBorrar extends Notification implements ShouldQueue
         return (new MailMessage)
                     ->line('Prueba de correo encolado')
                     ->line('Si estás leyendo esto parece que funciona');
+    }
+
+    public function toFirebase(object $notifiable): CloudMessage
+    {
+        return CloudMessage::fromArray([
+            'token' => $notifiable->firebasetoken,
+            'notification' => array(
+                "title" => "Prueba de notificación",
+                "body" => "Body de la prueba de notificación"
+            ),
+            'data' => array(
+                "title" => "Prueba de notificación",
+                "body" => "Body de la prueba de notificación"
+            ),
+        ]);
     }
 
     /**
