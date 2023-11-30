@@ -36,6 +36,10 @@ Route::post("/ajustes-cuenta",
     [UserController::class, "guardarAjustesCuentaUsuario"]
 )->middleware("auth:sanctum", "cuentaVerificada");
 
+Route::get("/ajustes-cuenta",
+    [UserController::class, "leerAjustesCuentaUsuario"]
+)->middleware("auth:sanctum", "cuentaVerificada");
+
 ////////////////////////////////
 /////// RUTAS DE DÉCIMOS ///////
 ////////////////////////////////

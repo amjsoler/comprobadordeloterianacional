@@ -92,4 +92,19 @@ class UserModelTest extends TestCase
 
         $this->assertEquals("token", User::find($userRand->id)->firebasetoken);
     }
+
+    public function test_guardarYLeerAjustesCuentaUsuario()
+    {
+        $this->assertEquals(-2, User::guardarAjustesCuentaUsuario(1, true, true)["code"]);
+
+        //Creamos nuevo user
+        $userRand = User::factory()->create();
+        $this->assertEquals(1, (User::leerAjustesCuentaUsuario($userRand->id)["data"])->alertasporcorreo);
+        $this->assertEquals(0, (User::leerAjustesCuentaUsuario($userRand->id)["data"])->alertaspornotificacion);
+
+        $this->assertEquals(0, User::guardarAjustesCuentaUsuario($userRand->id, false, true)["code"]);
+
+        $this->assertEquals(0, (User::leerAjustesCuentaUsuario($userRand->id)["data"])->alertasporcorreo);
+        $this->assertEquals(1, (User::leerAjustesCuentaUsuario($userRand->id)["data"])->alertaspornotificacion);
+    }
 }

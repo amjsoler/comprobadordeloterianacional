@@ -32,11 +32,11 @@ class PruebaQueuedBorrar extends Notification implements ShouldQueue
         $responseArray = array();
 
         if($notifiable->alertasporcorreo){
-            $responseArray = Arr::add("mail");
+            array_push($responseArray, "mail");
         }
 
         if($notifiable->alertaspornotificacion){
-            $responseArray = Arr::add(FirebaseChannel::class);
+            array_push($responseArray, FirebaseChannel::class);
         }
 
         return $responseArray;
@@ -54,17 +54,10 @@ class PruebaQueuedBorrar extends Notification implements ShouldQueue
 
     public function toFirebase(object $notifiable): CloudMessage
     {
-        return CloudMessage::fromArray([
-            'token' => $notifiable->firebasetoken,
-            'notification' => array(
-                "title" => "Prueba de notificación",
-                "body" => "Body de la prueba de notificación"
-            ),
-            'data' => array(
-                "title" => "Prueba de notificación",
-                "body" => "Body de la prueba de notificación"
-            ),
-        ]);
+        return CloudMessage::withNotification(
+            ["title" => "titledata", "body" => "bodydata"]
+            )
+            ->withData(["title" => "titledata", "body" => "bodydata"]);
     }
 
     /**

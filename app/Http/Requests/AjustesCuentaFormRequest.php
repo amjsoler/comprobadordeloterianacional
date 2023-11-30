@@ -73,18 +73,18 @@ class AjustesCuentaFormRequest extends FormRequest
     public function rules(): array
     {
         return [
-            "alertas_por_correo" => "required|boolean",
-            "alertas_por_notificacion" => "required|boolean"
+            "alertasporcorreo" => "required|boolean",
+            "alertaspornotificacion" => "required|boolean"
         ];
     }
 
     public function messages()
     {
         return [
-            "alertas_por_correo.required" => "Debes especificar el campo alertas por correo"  ,
-            "alertas_por_correo.boolean" => "El campo alertas por correo tiene un formato no valido",
-            "alertas_por_notificacion.required" => "El campo alertas por correo tiene un formato no valido",
-            "alertas_por_notificacion.boolean" => "El campo alertas por correo tiene un formato no valido",
+            "alertasporcorreo.required" => "Debes especificar el campo alertas por correo"  ,
+            "alertasporcorreo.boolean" => "El campo alertas por correo tiene un formato no valido",
+            "alertaspornotificacion.required" => "El campo alertas por correo tiene un formato no valido",
+            "alertaspornotificacion.boolean" => "El campo alertas por correo tiene un formato no valido",
         ];
     }
 }

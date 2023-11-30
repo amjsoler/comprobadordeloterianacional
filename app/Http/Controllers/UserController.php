@@ -31,8 +31,8 @@ class UserController extends Controller
             //Primero compruebo si están ya disponibles los resultado
             $resultGuardarAjustes = User::guardarAjustesCuentaUsuario(
                 auth()->user()->id,
-                $request->get("alertas_por_correo"),
-                $request->get("alertas_por_notificacion"),
+                $request->get("alertasporcorreo"),
+                $request->get("alertaspornotificacion"),
             );
 
             if($resultGuardarAjustes["code"] == 0){
@@ -77,6 +77,75 @@ class UserController extends Controller
             array(
                 "userID: " => auth()->user()->id,
                 "request: " => compact("request"),
+                "response: " => $response
+            )
+        );
+
+        return response()->json(
+            $response["data"],
+            $response["status"]
+        );
+    }
+
+    public function leerAjustesCuentaUsuario()
+    {
+        $response = [
+            "status" => "",
+            "code" => "",
+            "statusText" => "",
+            "data" => []
+        ];
+
+        try{
+            //Log de entrada
+            Log::debug("Entrando al leerAjustesCuentaUsuario de UserController",
+                array(
+                    "userID: " => auth()->user()->id,
+                )
+            );
+
+            //Primero compruebo si están ya disponibles los resultado
+            $resultLeerAjustes = User::leerAjustesCuentaUsuario(auth()->user()->id);
+
+            if($resultLeerAjustes["code"] == 0){
+                $resultLeerAjustes = $resultLeerAjustes["data"];
+
+                $response["code"] = 0;
+                $response["status"] = 200;
+                $response["statusText"] = "ok";
+                $response["data"] = $resultLeerAjustes;
+            }
+            else{
+                $response["code"] = -12;
+                $response["status"] = 400;
+                $response["statusText"] = "ko";
+
+                Log::error("No debería fallar una consulta de lectura",
+                    array(
+                        "userID: " => auth()->user()->id,
+                        "response: " => $response
+                    )
+                );
+            }
+
+        }
+        catch(Exception $e){
+            $response["code"] = -11;
+            $response["status"] = 400;
+            $response["statusText"] = "ko";
+
+            Log::error($e->getMessage(),
+                array(
+                    "userID: " => auth()->user()->id,
+                    "response: " => $response
+                )
+            );
+        }
+
+        //Log de salida
+        Log::debug("Saliendo del leerAjustesCuentaUsuario de UserController",
+            array(
+                "userID: " => auth()->user()->id,
                 "response: " => $response
             )
         );

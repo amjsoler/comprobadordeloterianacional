@@ -419,10 +419,23 @@ class User extends Authenticatable
         return $response;
     }
 
+    /**
+     * Método para guardar los ajustes de la cuenta de usuaruio
+     *
+     * @param int $userId El id del usuario sobre el que guardar los ajustes
+     * @param boolean $alertaPorCorreo Si se envían alertas por correo o no
+     * @param boolean $alertaPorNotificacion Si se envían alertas por notificación o no
+     *
+     * @return void
+     *  0: OK
+     * -1: Excepción
+     * -2: No se ha encontrado al usuario
+     * -3: Error al guardar los datos
+     */
     public static function guardarAjustesCuentaUsuario(
         int $userId,
-        boolean $alertaPorCorreo,
-        boolean $alertaPorNotificacion)
+        bool $alertasPorCorreo,
+        bool $alertasPorNotificacion)
     {
         $response = [
             "code" => "",
@@ -433,7 +446,7 @@ class User extends Authenticatable
             //Log de entrada
             Log::debug("Entrando al guardarAjustesCuentaUsuario de User",
                 array(
-                    "request: " => compact("userId", "alertaPorCorreo", "alertaPorNotificacion")
+                    "request: " => compact("userId", "alertasPorCorreo", "alertasPorNotificacion")
                 )
             );
 
@@ -441,8 +454,8 @@ class User extends Authenticatable
             $result = User::find($userId);
 
             if($result){
-                $result->alertaporcorreo = $alertaPorCorreo;
-                $result->alertapornotificaion = $alertaPorNotificacion;
+                $result->alertasporcorreo = $alertasPorCorreo;
+                $result->alertaspornotificacion = $alertasPorNotificacion;
 
                 if($result->save()){
                     $response["code"] = 0;
@@ -461,7 +474,7 @@ class User extends Authenticatable
 
             Log::error($e->getMessage(),
                 array(
-                    "request: " => compact("userId", "alertaPorCorreo", "alertaPorNotificacion"),
+                    "request: " => compact("userId", "alertasPorCorreo", "alertasPorNotificacion"),
                     "response: " => $response
                 )
             );
@@ -470,7 +483,66 @@ class User extends Authenticatable
         //Log de salida
         Log::debug("Saliendo del guardarAjustesCuentaUsuario de User",
             array(
-                "request: " => compact("userId", "alertaPorCorreo", "alertaPorNotificacion"),
+                "request: " => compact("userId", "alertasPorCorreo", "alertasPorNotificacion"),
+                "response: " => $response
+            )
+        );
+
+        return $response;
+    }
+
+    /**
+     * Método para leer los ajustes de la cuenta de usuario
+     *
+     * @param int $userId La cuenta del usuario
+     *
+     * @return User(campos limitados)
+     *  0: OK
+     * -1: Excepción
+     * -2: No se ha encontrado el usuario
+     */
+    public static function leerAjustesCuentaUsuario(int $userId)
+    {
+        $response = [
+            "code" => "",
+            "data" => ""
+        ];
+
+        try{
+            //Log de entrada
+            Log::debug("Entrando al leerAjustesCuentaUsuario de User",
+                array(
+                    "request: " => compact("userId")
+                )
+            );
+
+            //Acción
+            $result = User::find($userId)->get(["alertasporcorreo", "alertaspornotificacion"])->first();
+
+            if($result){
+                $response["code"] = 0;
+                $response["data"] = $result;
+            }else{
+                $response["code"] = -2;
+            }
+
+
+        }
+        catch(Exception $e){
+            $response["code"] = -1;
+
+            Log::error($e->getMessage(),
+                array(
+                    "request: " => compact("userId"),
+                    "response: " => $response
+                )
+            );
+        }
+
+        //Log de salida
+        Log::debug("Saliendo del leerAjustesCuentaUsuario de User",
+            array(
+                "request: " => compact("userId"),
                 "response: " => $response
             )
         );
