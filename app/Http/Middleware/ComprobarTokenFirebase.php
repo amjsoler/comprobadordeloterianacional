@@ -44,6 +44,12 @@ class ComprobarTokenFirebase
             }
         }
 
+        Log::debug("Saliendo del handle del ComprobarTokenFirebase",
+            array(
+                "request: " => compact("request")
+            )
+        );
+
         return $next($request);
     }
 }
