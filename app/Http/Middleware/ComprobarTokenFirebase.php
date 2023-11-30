@@ -36,7 +36,7 @@ class ComprobarTokenFirebase
             {
                 Log::debug("Guardo el token de firebase porque el user no tiene o no coincide",
                     array(
-                        "request: " => compact("request")
+                        "request: " => $request->all()
                     )
                 );
 
@@ -46,7 +46,7 @@ class ComprobarTokenFirebase
 
         Log::debug("Saliendo del handle del ComprobarTokenFirebase",
             array(
-                "request: " => compact("request")
+                "request: " => $request->all()
             )
         );
 
