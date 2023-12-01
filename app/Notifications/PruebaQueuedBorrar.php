@@ -54,7 +54,8 @@ class PruebaQueuedBorrar extends Notification implements ShouldQueue
 
     public function toFirebase(object $notifiable): CloudMessage
     {
-        return CloudMessage::withNotification(
+        return CloudMessage::withTarget("token", $notifiable->firebasetoken)
+        ->withNotification(
             ["title" => "titledata", "body" => "bodydata"]
             )
             ->withData(["title" => "titledata", "body" => "bodydata"]);
