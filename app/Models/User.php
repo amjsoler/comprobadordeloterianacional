@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Dyrynda\Database\Support\CascadeSoftDeletes;
 use Exception;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -14,7 +15,9 @@ use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable, SoftDeletes;
+    use HasApiTokens, HasFactory, Notifiable, SoftDeletes, CascadeSoftDeletes;
+
+    protected $cascadeDeletes = ["decimos"];
 
     protected $table = "users";
 
@@ -86,6 +89,64 @@ class User extends Authenticatable
     /////////////////////////////
     ///// MÉTODOS ESTÁTICOS /////
     /////////////////////////////
+
+    /**
+     * Método para eliminar cuenta de usuario
+     *
+     * @param int $userId El id del usuario
+     *
+     * @return void
+     *  0: OK
+     * -1: Excepción
+     * -2: Error al eliminar
+     */
+    public static function eliminarCuenta(int $userId)
+    {
+        $response = [
+            "code" => "",
+            "data" => ""
+        ];
+
+        try{
+            //Log de entrada
+            Log::debug("Entrando al eliminarCuenta de User",
+                array(
+                    "request: " => compact("userId")
+                )
+            );
+
+            //Acción
+            $usuario = User::find($userId);
+
+            if(!empty($usuario) && $usuario->delete()){
+                $response["code"] = 0;
+            }
+            else{
+                $response["code"] = -2;
+            }
+
+        }
+        catch(Exception $e){
+            $response["code"] = -1;
+
+            Log::error($e->getMessage(),
+                array(
+                    "request: " => compact("userId"),
+                    "response: " => $response
+                )
+            );
+        }
+
+        //Log de salida
+        Log::debug("Saliendo del eliminarCuenta de User",
+            array(
+                "request: " => compact("userId"),
+                "response: " => $response
+            )
+        );
+
+        return $response;
+    }
 
     /**
      * Función que devuelve un usuario dado el correo o nada si no existe

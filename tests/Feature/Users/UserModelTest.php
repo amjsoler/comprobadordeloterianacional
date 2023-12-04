@@ -107,4 +107,13 @@ class UserModelTest extends TestCase
         $this->assertEquals(0, (User::leerAjustesCuentaUsuario($userRand->id)["data"])->alertasporcorreo);
         $this->assertEquals(1, (User::leerAjustesCuentaUsuario($userRand->id)["data"])->alertaspornotificacion);
     }
+
+    public function test_eliminar_cuenta_de_usuario()
+    {
+        $this->assertEquals(-2, User::eliminarCuenta(999999)["code"]);
+
+        $userRand = User::factory()->create();
+
+        $this->assertEquals(0, User::eliminarCuenta($userRand->id)["code"]);
+    }
 }

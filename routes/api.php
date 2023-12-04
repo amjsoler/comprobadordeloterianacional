@@ -40,6 +40,14 @@ Route::get("/ajustes-cuenta",
     [UserController::class, "leerAjustesCuentaUsuario"]
 )->middleware("auth:sanctum", "cuentaVerificada");
 
+Route::get("/eliminar-cuenta",
+    [UserController::class, "eliminarCuenta"]
+)->middleware("auth:sanctum", "cuentaVerificada");
+
+Route::post("/enviar-sugerencia",
+    [UserController::class, "enviarSugerencia"]
+)->middleware("auth:sanctum", "cuentaVerificada");
+
 ////////////////////////////////
 /////// RUTAS DE DÉCIMOS ///////
 ////////////////////////////////

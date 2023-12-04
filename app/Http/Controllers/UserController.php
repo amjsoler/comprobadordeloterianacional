@@ -3,13 +3,151 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\AjustesCuentaFormRequest;
-use App\Models\Sorteo;
+use App\Http\Requests\EnviarSugerenciaFormRequest;
 use App\Models\User;
+use App\Notifications\EnviarSugerenciaAlAdministrador;
 use Exception;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Notification;
 
 class UserController extends Controller
 {
+    public function enviarSugerencia(EnviarSugerenciaFormRequest $request)
+    {
+        $response = [
+            "status" => "",
+            "code" => "",
+            "statusText" => "",
+            "data" => []
+        ];
+
+        try{
+            //Log de entrada
+            Log::debug("Entrando al enviarSugerencia de UserController",
+                array(
+                    "userID: " => auth()->user()->id,
+                    "request: " => $request->all()
+                )
+            );
+
+            Notification::send(User::where("email", env("ADMIN_AUTORIZADO"))->first(), new EnviarSugerenciaAlAdministrador($request->get("texto"), auth()->user()->email));
+
+            $response["status"] = 200;
+            $response["code"] = 0;
+        }
+        catch(Exception $e){
+            $response["code"] = -11;
+            $response["status"] = 400;
+            $response["statusText"] = "ko";
+
+            Log::error($e->getMessage(),
+                array(
+                    "userID: " => auth()->user()->id,
+                    "request: " => $request->all(),
+                    "response: " => $response
+                )
+            );
+        }
+
+        //Log de salida
+        Log::debug("Saliendo del enviarSugerencia de UserController",
+            array(
+                "userID: " => auth()->user()->id,
+                "request: " => $request->all(),
+                "response: " => $response
+            )
+        );
+
+        return response()->json(
+            $response["data"],
+            $response["status"]
+        );
+    }
+
+    /**
+     * Método para eliminar la cuenta de usuario del usuario logueado
+     *
+     * @return void
+     *   0: ok
+     * -11: Excepción
+     * -12: Fallo en el método de eliminación del modelo
+     */
+    public function eliminarCuenta()
+    {
+        $response = [
+            "status" => "",
+            "code" => "",
+            "statusText" => "",
+            "data" => []
+        ];
+
+        try{
+            //Log de entrada
+            Log::debug("Entrando al eliminarCuenta de UserController",
+                array(
+                    "userID: " => auth()->user()->id,
+                )
+            );
+
+            //Primero compruebo si están ya disponibles los resultado
+            $resultEliminarCuenta = User::eliminarCuenta(auth()->user()->id);
+
+            if($resultEliminarCuenta["code"] == 0){
+                $response["code"] = 0;
+                $response["status"] = 200;
+                $response["statusText"] = "ok";
+            }
+            else{
+                $response["code"] = -12;
+                $response["status"] = 400;
+                $response["statusText"] = "ko";
+
+                Log::error("No debería fallar una consulta de eliminación",
+                    array(
+                        "userID: " => auth()->user()->id,
+                        "response: " => $response
+                    )
+                );
+            }
+
+        }
+        catch(Exception $e){
+            $response["code"] = -11;
+            $response["status"] = 400;
+            $response["statusText"] = "ko";
+
+            Log::error($e->getMessage(),
+                array(
+                    "userID: " => auth()->user()->id,
+                    "response: " => $response
+                )
+            );
+        }
+
+        //Log de salida
+        Log::debug("Saliendo del eliminarCuenta de UserController",
+            array(
+                "userID: " => auth()->user()->id,
+                "response: " => $response
+            )
+        );
+
+        return response()->json(
+            $response["data"],
+            $response["status"]
+        );
+    }
+
+    /**
+     * Método que almacena la nueva configuración de usuario con las alertas
+     *
+     * @param AjustesCuentaFormRequest $request Los parámetros de configuración
+     *
+     * @return void
+     *  0: OK
+     * -11: Excepción
+     * -12: Fallo en el modelo
+     */
     public function guardarAjustesCuentaUsuario(AjustesCuentaFormRequest $request)
     {
         $response = [
