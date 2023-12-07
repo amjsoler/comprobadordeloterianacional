@@ -201,7 +201,7 @@ class Sorteo extends Model
             Log::debug("Entrando al sorteosDisponibles de Sorteo");
 
             $sorteosDisponibles = Sorteo::whereNull("resultados")
-                ->where("fecha", ">=", now())
+                ->whereDate("fecha", ">=", now()->toDate())
                 ->get();
 
             $response["code"] = 0;

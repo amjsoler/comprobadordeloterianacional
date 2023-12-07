@@ -109,3 +109,10 @@ Route::get("esnifar-resultados", function(){
 })->middleware("auth:sanctum", "cuentaVerificada")
     ->can("delete", Sorteo::class);
 
+Route::get("politica-de-privacidad", function(){
+    return view("politicaDePrivacidad");
+});
+
+Route::get("tutorial-eliminar-cuenta", function() {
+    return view("tutorialEliminarCuenta");
+});
