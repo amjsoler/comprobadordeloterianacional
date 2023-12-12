@@ -15,8 +15,8 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule): void
     {
         //TODO: Una vez en produccion, ver si estas tareas requieren de un withoutoverlapping
-        $schedule->job(new EsnifarSorteos())->everyTenMinutes();
-        $schedule->job(new EsnifarResultados())->everyTenMinutes();
+        $schedule->job(new EsnifarSorteos())->everyThirtyMinutes();
+        $schedule->job(new EsnifarResultados())->everyThirtyMinutes();
     }
 
     /**
